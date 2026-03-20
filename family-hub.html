@@ -71,11 +71,37 @@
         
         .header-center {
             text-align: center;
+            flex: 1;
+        }
+        
+        .next-bus-main {
+            font-size: 42px;
+            font-weight: 600;
+            color: #00ff88;
+            text-align: center;
+        }
+        
+        .next-bus-main.soon {
+            color: #ffaa00;
         }
         
         .date {
-            font-size: 24px;
+            font-size: 20px;
             color: #888;
+        }
+        
+        /* Clock Bar */
+        .clock-bar {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 10px;
+        }
+        
+        .clock {
+            font-size: 48px;
+            font-weight: 300;
+            font-variant-numeric: tabular-nums;
+            color: #00d4ff;
         }
         
         .weather {
@@ -294,9 +320,28 @@
         }
         
         .day-cook {
-            font-size: 18px;
-            color: #888;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
+        
+        .day-cook-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 24px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+        
+        .day-cook-avatar.jim { background: linear-gradient(135deg, #00d4ff, #7b2cbf); }
+        .day-cook-avatar.nic { background: linear-gradient(135deg, #ff6b6b, #feca57); }
+        .day-cook-avatar.sophie { background: linear-gradient(135deg, #a29bfe, #6c5ce7); }
+        .day-cook-avatar.lilly { background: linear-gradient(135deg, #fd79a8, #e84393); }
+        .day-cook-avatar.family { background: linear-gradient(135deg, #00b894, #00cec9); }
         
         .day-meal {
             font-size: 20px;
@@ -531,16 +576,20 @@
         <!-- Header -->
         <div class="header">
             <div class="header-left">
-                <div class="clock" id="clock">--:--</div>
-                <div class="next-bus" id="next-bus">Loading next bus...</div>
+                <div class="date" id="date">Loading...</div>
             </div>
             <div class="header-center">
-                <div class="date" id="date">Loading...</div>
+                <div class="next-bus-main" id="next-bus">Loading next bus...</div>
             </div>
             <div class="weather">
                 <div class="weather-temp" id="weather-temp">--°</div>
                 <div class="weather-desc" id="weather-desc">Loading...</div>
             </div>
+        </div>
+        
+        <!-- Clock Bar -->
+        <div class="clock-bar">
+            <div class="clock" id="clock">--:--</div>
         </div>
         
         <!-- Weekly Meal Plan Panel -->
@@ -848,19 +897,19 @@
                     const busEl = document.getElementById('next-bus');
                     if (minsUntil < 0) {
                         busEl.textContent = `Bus ${lineNo} departed`;
-                        busEl.className = 'next-bus';
+                        busEl.className = 'next-bus-main';
                     } else if (minsUntil === 0) {
                         busEl.textContent = `Bus ${lineNo} departing now!`;
-                        busEl.className = 'next-bus soon';
+                        busEl.className = 'next-bus-main soon';
                     } else if (minsUntil === 1) {
                         busEl.textContent = `Bus ${lineNo} in 1 min`;
-                        busEl.className = 'next-bus soon';
+                        busEl.className = 'next-bus-main soon';
                     } else if (minsUntil < 60) {
                         busEl.textContent = `Bus ${lineNo} in ${minsUntil} mins`;
-                        busEl.className = minsUntil < 10 ? 'next-bus soon' : 'next-bus';
+                        busEl.className = minsUntil < 10 ? 'next-bus-main soon' : 'next-bus-main';
                     } else {
                         busEl.textContent = `Bus ${lineNo} at ${new Date(departureTime).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit', hour12: false })}`;
-                        busEl.className = 'next-bus';
+                        busEl.className = 'next-bus-main';
                     }
                 } else {
                     document.getElementById('next-bus').textContent = 'No buses found';
