@@ -409,7 +409,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
         }
         
         .cook-option:hover {
@@ -422,10 +421,10 @@
         }
         
         .cook-avatar {
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
-            font-size: 20px;
+            font-size: 24px;
             font-weight: 700;
             display: flex;
             align-items: center;
@@ -436,6 +435,15 @@
         .cook-avatar.nic { background: linear-gradient(135deg, #ff6b6b, #feca57); }
         .cook-avatar.sophie { background: linear-gradient(135deg, #a29bfe, #6c5ce7); }
         .cook-avatar.lilly { background: linear-gradient(135deg, #fd79a8, #e84393); }
+        
+        .cook-option.not-eating .cook-avatar {
+            opacity: 0.3;
+            filter: grayscale(100%);
+        }
+        
+        .cook-option.not-eating {
+            background: rgba(255,255,255,0.02);
+        }
         
         .cook-name {
             font-size: 18px;
@@ -647,19 +655,15 @@
                     <div class="cook-options">
                         <div class="cook-option" onclick="selectCook(this, 'mon', 'Jim')">
                             <div class="cook-avatar jim">J</div>
-                            <span class="cook-name">Jim</span>
                         </div>
                         <div class="cook-option" onclick="selectCook(this, 'mon', 'Nicola')">
                             <div class="cook-avatar nic">N</div>
-                            <span class="cook-name">Nic</span>
                         </div>
                         <div class="cook-option" onclick="selectCook(this, 'mon', 'Sophie')">
                             <div class="cook-avatar sophie">S</div>
-                            <span class="cook-name">Sophie</span>
                         </div>
                         <div class="cook-option" onclick="selectCook(this, 'mon', 'Lilly')">
                             <div class="cook-avatar lilly">L</div>
-                            <span class="cook-name">Lilly</span>
                         </div>
                     </div>
                 </div>
@@ -668,19 +672,15 @@
                     <div class="cook-options">
                         <div class="cook-option" onclick="selectCook(this, 'tue', 'Jim')">
                             <div class="cook-avatar jim">J</div>
-                            <span class="cook-name">Jim</span>
                         </div>
                         <div class="cook-option" onclick="selectCook(this, 'tue', 'Nicola')">
                             <div class="cook-avatar nic">N</div>
-                            <span class="cook-name">Nic</span>
                         </div>
                         <div class="cook-option" onclick="selectCook(this, 'tue', 'Sophie')">
                             <div class="cook-avatar sophie">S</div>
-                            <span class="cook-name">Sophie</span>
                         </div>
                         <div class="cook-option" onclick="selectCook(this, 'tue', 'Lilly')">
                             <div class="cook-avatar lilly">L</div>
-                            <span class="cook-name">Lilly</span>
                         </div>
                     </div>
                 </div>
@@ -689,19 +689,15 @@
                     <div class="cook-options">
                         <div class="cook-option" onclick="selectCook(this, 'wed', 'Jim')">
                             <div class="cook-avatar jim">J</div>
-                            <span class="cook-name">Jim</span>
                         </div>
                         <div class="cook-option" onclick="selectCook(this, 'wed', 'Nicola')">
                             <div class="cook-avatar nic">N</div>
-                            <span class="cook-name">Nic</span>
                         </div>
                         <div class="cook-option" onclick="selectCook(this, 'wed', 'Sophie')">
                             <div class="cook-avatar sophie">S</div>
-                            <span class="cook-name">Sophie</span>
                         </div>
                         <div class="cook-option" onclick="selectCook(this, 'wed', 'Lilly')">
                             <div class="cook-avatar lilly">L</div>
-                            <span class="cook-name">Lilly</span>
                         </div>
                     </div>
                 </div>
@@ -710,19 +706,15 @@
                     <div class="cook-options">
                         <div class="cook-option" onclick="selectCook(this, 'thu', 'Jim')">
                             <div class="cook-avatar jim">J</div>
-                            <span class="cook-name">Jim</span>
                         </div>
                         <div class="cook-option" onclick="selectCook(this, 'thu', 'Nicola')">
                             <div class="cook-avatar nic">N</div>
-                            <span class="cook-name">Nic</span>
                         </div>
                         <div class="cook-option" onclick="selectCook(this, 'thu', 'Sophie')">
                             <div class="cook-avatar sophie">S</div>
-                            <span class="cook-name">Sophie</span>
                         </div>
                         <div class="cook-option" onclick="selectCook(this, 'thu', 'Lilly')">
                             <div class="cook-avatar lilly">L</div>
-                            <span class="cook-name">Lilly</span>
                         </div>
                     </div>
                 </div>
@@ -731,19 +723,15 @@
                     <div class="cook-options">
                         <div class="cook-option" onclick="selectCook(this, 'fri', 'Jim')">
                             <div class="cook-avatar jim">J</div>
-                            <span class="cook-name">Jim</span>
                         </div>
                         <div class="cook-option" onclick="selectCook(this, 'fri', 'Nicola')">
                             <div class="cook-avatar nic">N</div>
-                            <span class="cook-name">Nic</span>
                         </div>
                         <div class="cook-option" onclick="selectCook(this, 'fri', 'Sophie')">
                             <div class="cook-avatar sophie">S</div>
-                            <span class="cook-name">Sophie</span>
                         </div>
                         <div class="cook-option" onclick="selectCook(this, 'fri', 'Lilly')">
                             <div class="cook-avatar lilly">L</div>
-                            <span class="cook-name">Lilly</span>
                         </div>
                     </div>
                 </div>
@@ -752,19 +740,15 @@
                     <div class="cook-options">
                         <div class="cook-option" onclick="selectCook(this, 'sat', 'Jim')">
                             <div class="cook-avatar jim">J</div>
-                            <span class="cook-name">Jim</span>
                         </div>
                         <div class="cook-option" onclick="selectCook(this, 'sat', 'Nicola')">
                             <div class="cook-avatar nic">N</div>
-                            <span class="cook-name">Nic</span>
                         </div>
                         <div class="cook-option" onclick="selectCook(this, 'sat', 'Sophie')">
                             <div class="cook-avatar sophie">S</div>
-                            <span class="cook-name">Sophie</span>
                         </div>
                         <div class="cook-option" onclick="selectCook(this, 'sat', 'Lilly')">
                             <div class="cook-avatar lilly">L</div>
-                            <span class="cook-name">Lilly</span>
                         </div>
                     </div>
                 </div>
@@ -773,19 +757,15 @@
                     <div class="cook-options">
                         <div class="cook-option" onclick="selectCook(this, 'sun', 'Jim')">
                             <div class="cook-avatar jim">J</div>
-                            <span class="cook-name">Jim</span>
                         </div>
                         <div class="cook-option" onclick="selectCook(this, 'sun', 'Nicola')">
                             <div class="cook-avatar nic">N</div>
-                            <span class="cook-name">Nic</span>
                         </div>
                         <div class="cook-option" onclick="selectCook(this, 'sun', 'Sophie')">
                             <div class="cook-avatar sophie">S</div>
-                            <span class="cook-name">Sophie</span>
                         </div>
                         <div class="cook-option" onclick="selectCook(this, 'sun', 'Lilly')">
                             <div class="cook-avatar lilly">L</div>
-                            <span class="cook-name">Lilly</span>
                         </div>
                     </div>
                 </div>
@@ -914,6 +894,8 @@
         
         // Cook Picker Functions
         let selectedCooks = {};
+        let notEating = {}; // Track who's not eating each day
+        let longPressTimer;
         
         function openCookPicker() {
             document.getElementById('cookModal').classList.add('active');
@@ -926,6 +908,30 @@
                     selectedCooks[day] = cookName;
                 }
             });
+            
+            // Apply not-eating state to visual elements
+            applyNotEatingVisuals();
+        }
+        
+        function applyNotEatingVisuals() {
+            Object.entries(notEating).forEach(([dayKey, people]) => {
+                const [day, person] = dayKey.split('-');
+                const dayColumn = document.querySelector(`.picker-day:nth-child(${getDayIndex(day) + 1})`);
+                if (dayColumn) {
+                    const options = dayColumn.querySelectorAll('.cook-option');
+                    options.forEach(opt => {
+                        const avatar = opt.querySelector('.cook-avatar');
+                        if (avatar && avatar.textContent === person.charAt(0)) {
+                            opt.classList.add('not-eating');
+                        }
+                    });
+                }
+            });
+        }
+        
+        function getDayIndex(day) {
+            const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+            return days.indexOf(day);
         }
         
         function closeCookPicker() {
@@ -933,6 +939,14 @@
         }
         
         function selectCook(element, day, cook) {
+            // Check if this person is marked as not eating
+            const notEatingKey = `${day}-${cook}`;
+            if (notEating[notEatingKey]) {
+                // Remove not-eating status
+                delete notEating[notEatingKey];
+                element.classList.remove('not-eating');
+            }
+            
             // Remove selected class from all options for this day
             const dayOptions = element.parentElement.querySelectorAll('.cook-option');
             dayOptions.forEach(opt => opt.classList.remove('selected'));
@@ -942,6 +956,28 @@
             
             // Store selection
             selectedCooks[day] = cook;
+        }
+        
+        function handleLongPress(element, day, cook) {
+            const notEatingKey = `${day}-${cook}`;
+            
+            if (notEating[notEatingKey]) {
+                // Remove not-eating status
+                delete notEating[notEatingKey];
+                element.classList.remove('not-eating');
+                // Also select them as cook
+                selectCook(element, day, cook);
+            } else {
+                // Mark as not eating
+                notEating[notEatingKey] = true;
+                element.classList.add('not-eating');
+                element.classList.remove('selected');
+                
+                // If they were the selected cook, clear that
+                if (selectedCooks[day] === cook) {
+                    delete selectedCooks[day];
+                }
+            }
         }
         
         function saveCooks() {
@@ -960,11 +996,14 @@
             
             // Save to localStorage for persistence
             localStorage.setItem('familyHubCooks', JSON.stringify(selectedCooks));
+            localStorage.setItem('familyHubNotEating', JSON.stringify(notEating));
         }
         
         // Load saved cooks on startup
         function loadSavedCooks() {
             const saved = localStorage.getItem('familyHubCooks');
+            const savedNotEating = localStorage.getItem('familyHubNotEating');
+            
             if (saved) {
                 selectedCooks = JSON.parse(saved);
                 const dayMap = { 'mon': 0, 'tue': 1, 'wed': 2, 'thu': 3, 'fri': 4, 'sat': 5, 'sun': 6 };
@@ -977,9 +1016,45 @@
                     }
                 });
             }
+            
+            if (savedNotEating) {
+                notEating = JSON.parse(savedNotEating);
+            }
         }
         
-        loadSavedCooks();
+        // Add long-press event listeners after page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSavedCooks();
+            
+            // Add touch/mouse events for long press
+            const cookOptions = document.querySelectorAll('.cook-option');
+            cookOptions.forEach(option => {
+                const onclick = option.getAttribute('onclick');
+                const match = onclick.match(/selectCook\(this, '([^']+)', '([^']+)'\)/);
+                if (match) {
+                    const day = match[1];
+                    const cook = match[2];
+                    
+                    const startLongPress = (e) => {
+                        e.preventDefault();
+                        longPressTimer = setTimeout(() => {
+                            handleLongPress(option, day, cook);
+                        }, 800); // 800ms for long press
+                    };
+                    
+                    const cancelLongPress = () => {
+                        clearTimeout(longPressTimer);
+                    };
+                    
+                    option.addEventListener('touchstart', startLongPress, {passive: false});
+                    option.addEventListener('touchend', cancelLongPress);
+                    option.addEventListener('touchmove', cancelLongPress);
+                    option.addEventListener('mousedown', startLongPress);
+                    option.addEventListener('mouseup', cancelLongPress);
+                    option.addEventListener('mouseleave', cancelLongPress);
+                }
+            });
+        });
     </script>
 </body>
 </html>
