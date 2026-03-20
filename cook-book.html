@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Cook Book - Family Recipe Database</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 80px;
+            background: rgba(0,0,0,0.3);
+            border-right: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+        }
+        
+        .nav-item {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #888;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: rgba(0,212,255,0.2);
+            color: #00d4ff;
+        }
+        
+        .nav-icon {
+            font-size: 28px;
+            margin-bottom: 4px;
+        }
+        
+        .nav-label {
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+        
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: rgba(0,0,0,0.2);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .header-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #00d4ff;
+        }
+        
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 12px 20px;
+            width: 400px;
+        }
+        
+        .search-bar input {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 16px;
+            flex: 1;
+            margin-left: 10px;
+            outline: none;
+        }
+        
+        .search-bar input::placeholder {
+            color: #666;
+        }
+        
+        /* Content Views */
+        .content-view {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            display: none;
+        }
+        
+        .content-view.active {
+            display: block;
+        }
+        
+        /* Recipe Grid */
+        .recipe-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+        
+        .recipe-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .recipe-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,212,255,0.2);
+            border-color: rgba(0,212,255,0.3);
+        }
+        
+        .recipe-image {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, #2d3436, #636e72);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+        }
+        
+        .recipe-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .recipe-info {
+            padding: 20px;
+        }
+        
+        .recipe-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .recipe-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 14px;
+            color: #888;
+        }
+        
+        .recipe-meta span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .recipe-tags {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .tag {
+            background: rgba(0,212,255,0.1);
+            color: #00d4ff;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+        
+        /* Category Filter */
+        .category-filter {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+        
+        .category-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 25px;
+            padding: 12px 25px;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        .category-btn:hover, .category-btn.active {
+            background: rgba(0,212,255,0.2);
+            border-color: #00d4ff;
+        }
+        
+        /* Recipe Detail Modal */
+        .recipe-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .recipe-modal.active {
+            display: block;
+        }
+        
+        .recipe-detail {
+            max-width: 900px;
+            margin: 40px auto;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 24px;
+            overflow: hidden;
+        }
+        
+        .recipe-detail-header {
+            position: relative;
+            height: 300px;
+            background: linear-gradient(135deg, #2d3436, #636e72);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 150px;
+        }
+        
+        .recipe-detail-header img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .close-detail {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.5);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .recipe-detail-content {
+            padding: 40px;
+        }
+        
+        .recipe-detail-title {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        .recipe-detail-meta {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .meta-item {
+            text-align: center;
+        }
+        
+        .meta-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #00d4ff;
+        }
+        
+        .meta-label {
+            font-size: 14px;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        .recipe-section {
+            margin-bottom: 30px;
+        }
+        
+        .recipe-section-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #00d4ff;
+            margin-bottom: 15px;
+        }
+        
+        .ingredients-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .ingredient-item {
+            background: rgba(255,255,255,0.05);
+            padding: 12px 20px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .ingredient-check {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .ingredient-check.checked {
+            background: #00ff88;
+            border-color: #00ff88;
+        }
+        
+        .steps-list {
+            counter-reset: step;
+        }
+        
+        .step-item {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+        }
+        
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: rgba(0,212,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #00d4ff;
+            flex-shrink: 0;
+        }
+        
+        .step-text {
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        
+        /* Ideas Section */
+        .ideas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+        
+        .idea-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .idea-card:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(0,212,255,0.3);
+        }
+        
+        .idea-source {
+            font-size: 12px;
+            color: #00d4ff;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        
+        .idea-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .idea-desc {
+            font-size: 16px;
+            color: #888;
+            line-height: 1.5;
+        }
+        
+        .add-to-cookbook {
+            margin-top: 15px;
+            background: rgba(0,212,255,0.2);
+            border: 1px solid #00d4ff;
+            border-radius: 8px;
+            padding: 10px 20px;
+            color: #00d4ff;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .add-to-cookbook:hover {
+            background: rgba(0,212,255,0.3);
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="nav-item active" onclick="showView('recipes')">
+                <span class="nav-icon">📖</span>
+                <span class="nav-label">Recipes</span>
+            </div>
+            <div class="nav-item" onclick="showView('ideas')">
+                <span class="nav-icon">💡</span>
+                <span class="nav-label">Ideas</span>
+            </div>
+            <div class="nav-item" onclick="showView('favorites')">
+                <span class="nav-icon">⭐</span>
+                <span class="nav-label">Favorites</span>
+            </div>
+            <div class="nav-item" onclick="showView('planner')">
+                <span class="nav-icon">📅</span>
+                <span class="nav-label">Planner</span>
+            </div>
+            <div class="nav-item" onclick="window.location.href='family-hub.html'">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Hub</span>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <h1 class="header-title">📖 Cook Book</h1>
+                <div class="search-bar">
+                    <span>🔍</span>
+                    <input type="text" placeholder="Search recipes, ingredients..." id="searchInput">
+                </div>
+            </div>
+            
+            <!-- Recipes View -->
+            <div class="content-view active" id="recipes-view">
+                <div class="category-filter">
+                    <button class="category-btn active">All Recipes</button>
+                    <button class="category-btn">🍝 Pasta</button>
+                    <button class="category-btn">🥩 Meat</button>
+                    <button class="category-btn">🐟 Seafood</button>
+                    <button class="category-btn">🥗 Vegetarian</button>
+                    <button class="category-btn">🍕 Quick</button>
+                    <button class="category-btn">🎉 Special</button>
+                </div>
+                
+                <div class="recipe-grid">
+                    <!-- Sample Recipe Cards -->
+                    <div class="recipe-card" onclick="showRecipeDetail('spaghetti-bolognese')">
+                        <div class="recipe-image">🍝</div>
+                        <div class="recipe-info">
+                            <div class="recipe-title">Spaghetti Bolognese</div>
+                            <div class="recipe-meta">
+                                <span>⏱️ 45 min</span>
+                                <span>👥 4 serves</span>
+                                <span>📊 Easy</span>
+                            </div>
+                            <div class="recipe-tags">
+                                <span class="tag">Pasta</span>
+                                <span class="tag">Italian</span>
+                                <span class="tag">Family Fave</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="recipe-card" onclick="showRecipeDetail('chicken-curry')">
+                        <div class="recipe-image">🍛</div>
+                        <div class="recipe-info">
+                            <div class="recipe-title">Thai Green Chicken Curry</div>
+                            <div class="recipe-meta">
+                                <span>⏱️ 35 min</span>
+                                <span>👥 4 serves</span>
+                                <span>📊 Medium</span>
+                            </div>
+                            <div class="recipe-tags">
+                                <span class="tag">Curry</span>
+                                <span class="tag">Thai</span>
+                                <span class="tag">Spicy</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="recipe-card" onclick="showRecipeDetail('fish-tacos')">
+                        <div class="recipe-image">🌮</div>
+                        <div class="recipe-info">
+                            <div class="recipe-title">Baja Fish Tacos</div>
+                            <div class="recipe-meta">
+                                <span>⏱️ 30 min</span>
+                                <span>👥 4 serves</span>
+                                <span>📊 Easy</span>
+                            </div>
+                            <div class="recipe-tags">
+                                <span class="tag">Mexican</span>
+                                <span class="tag">Seafood</span>
+                                <span class="tag">Fresh</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="recipe-card" onclick="showRecipeDetail('roast-chicken')">
+                        <div class="recipe-image">🍗</div>
+                        <div class="recipe-info">
+                            <div class="recipe-title">Sunday Roast Chicken</div>
+                            <div class="recipe-meta">
+                                <span>⏱️ 90 min</span>
+                                <span>👥 6 serves</span>
+                                <span>📊 Medium</span>
+                            </div>
+                            <div class="recipe-tags">
+                                <span class="tag">Roast</span>
+                                <span class="tag">Sunday</span>
+                                <span class="tag">Classic</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="recipe-card" onclick="showRecipeDetail('vegetable-stirfry')">
+                        <div class="recipe-image">🥗</div>
+                        <div class="recipe-info">
+                            <div class="recipe-title">Vegetable Stir Fry</div>
+                            <div class="recipe-meta">
+                                <span>⏱️ 20 min</span>
+                                <span>👥 4 serves</span>
+                                <span>📊 Easy</span>
+                            </div>
+                            <div class="recipe-tags">
+                                <span class="tag">Vegetarian</span>
+                                <span class="tag">Quick</span>
+                                <span class="tag">Healthy</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="recipe-card" onclick="showRecipeDetail('beef-burgers')">
+                        <div class="recipe-image">🍔</div>
+                        <div class="recipe-info">
+                            <div class="recipe-title">Gourmet Beef Burgers</div>
+                            <div class="recipe-meta">
+                                <span>⏱️ 40 min</span>
+                                <span>👥 4 serves</span>
+                                <span>📊 Easy</span>
+                            </div>
+                            <div class="recipe-tags">
+                                <span class="tag">BBQ</span>
+                                <span class="tag">Beef</span>
+                                <span class="tag">Weekend</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Ideas View -->
+            <div class="content-view" id="ideas-view">
+                <div class="category-filter">
+                    <button class="category-btn active">All Ideas</button>
+                    <button class="category-btn">Trending</button>
+                    <button class="category-btn">Quick Dinners</button>
+                    <button class="category-btn">Healthy</button>
+                    <button class="category-btn">Kids Love</button>
+                </div>
+                
+                <div class="ideas-grid">
+                    <div class="idea-card">
+                        <div class="idea-source">From: Taste.com.au</div>
+                        <div class="idea-title">One-Pan Lemon Herb Salmon</div>
+                        <div class="idea-desc">Fresh salmon fillets baked with lemon, herbs, and asparagus. Ready in 25 minutes with minimal cleanup.</div>
+                        <button class="add-to-cookbook">+ Add to Cook Book</button>
+                    </div>
+                    
+                    <div class="idea-card">
+                        <div class="idea-source">From: BBC Good Food</div>
+                        <div class="idea-title">Slow Cooker Beef Stew</div>
+                        <div class="idea-desc">Hearty winter comfort food. Tender beef, root vegetables, and rich gravy. Perfect for busy weekdays.</div>
+                        <button class="add-to-cookbook">+ Add to Cook Book</button>
+                    </div>
+                    
+                    <div class="idea-card">
+                        <div class="idea-source">From: AllRecipes</div>
+                        <div class="idea-title">Mediterranean Chickpea Salad</div>
+                        <div class="idea-desc">Fresh, healthy, and packed with protein. Great for lunch or light dinner. Ready in 15 minutes.</div>
+                        <button class="add-to-cookbook">+ Add to Cook Book</button>
+                    </div>
+                    
+                    <div class="idea-card">
+                        <div class="idea-source">From: Jamie Oliver</div>
+                        <div class="idea-title">5-Ingredient Pasta</div>
+                        <div class="idea-desc">Simple yet delicious. Pasta, garlic, chili, parsley, and parmesan. A weeknight lifesaver.</div>
+                        <button class="add-to-cookbook">+ Add to Cook Book</button>
+                    </div>
+                    
+                    <div class="idea-card">
+                        <div class="idea-source">From: Bon Appétit</div>
+                        <div class="idea-title">Korean BBQ Beef Bowl</div>
+                        <div class="idea-desc">Sweet and savory bulgogi-style beef over rice with pickled vegetables. Family favorite!</div>
+                        <button class="add-to-cookbook">+ Add to Cook Book</button>
+                    </div>
+                    
+                    <div class="idea-card">
+                        <div class="idea-source">From: Food Network</div>
+                        <div class="idea-title">Sheet Pan Fajitas</div>
+                        <div class="idea-desc">Chicken, peppers, and onions roasted together. Serve with warm tortillas and all the toppings.</div>
+                        <button class="add-to-cookbook">+ Add to Cook Book</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Favorites View -->
+            <div class="content-view" id="favorites-view">
+                <div class="recipe-grid">
+                    <div class="recipe-card">
+                        <div class="recipe-image">🍝</div>
+                        <div class="recipe-info">
+                            <div class="recipe-title">Spaghetti Bolognese ⭐</div>
+                            <div class="recipe-meta">
+                                <span>⏱️ 45 min</span>
+                                <span>👥 4 serves</span>
+                                <span>📊 Easy</span>
+                            </div>
+                            <div class="recipe-tags">
+                                <span class="tag">Family Fave</span>
+                                <span class="tag">Jim's Specialty</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Planner View -->
+            <div class="content-view" id="planner-view">
+                <h2 style="font-size: 28px; color: #00d4ff; margin-bottom: 30px;">📅 Meal Planner</h2>
+                <p style="font-size: 18px; color: #888;">Go to the Family Hub to plan this week's meals</p>
+                <button class="add-to-cookbook" style="margin-top: 20px; font-size: 18px; padding: 15px 30px;" onclick="window.location.href='family-hub.html'">
+                    Open Family Hub →
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recipe Detail Modal -->
+    <div class="recipe-modal" id="recipeModal">
+        <div class="recipe-detail">
+            <div class="recipe-detail-header">
+                <span style="font-size: 150px;">🍝</span>
+                <button class="close-detail" onclick="closeRecipeDetail()">✕</button>
+            </div>
+            <div class="recipe-detail-content">
+                <h2 class="recipe-detail-title">Spaghetti Bolognese</h2>
+                
+                <div class="recipe-detail-meta">
+                    <div class="meta-item">
+                        <div class="meta-value">45</div>
+                        <div class="meta-label">minutes</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-value">4</div>
+                        <div class="meta-label">serves</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-value">Easy</div>
+                        <div class="meta-label">difficulty</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-value">⭐ 4.8</div>
+                        <div class="meta-label">rating</div>
+                    </div>
+                </div>
+                
+                <div class="recipe-section">
+                    <h3 class="recipe-section-title">📝 Ingredients</h3>
+                    <div class="ingredients-list">
+                        <div class="ingredient-item">
+                            <div class="ingredient-check"></div>
+                            <span>500g spaghetti</span>
+                        </div>
+                        <div class="ingredient-item">
+                            <div class="ingredient-check"></div>
+                            <span>400g beef mince</span>
+                        </div>
+                        <div class="ingredient-item">
+                            <div class="ingredient-check"></div>
+                            <span>1 onion, diced</span>
+                        </div>
+                        <div class="ingredient-item">
+                            <div class="ingredient-check"></div>
+                            <span>2 cloves garlic</span>
+                        </div>
+                        <div class="ingredient-item">
+                            <div class="ingredient-check"></div>
+                            <span>400g canned tomatoes</span>
+                        </div>
+                        <div class="ingredient-item">
+                            <div class="ingredient-check"></div>
+                            <span>2 tbsp tomato paste</span>
+                        </div>
+                        <div class="ingredient-item">
+                            <div class="ingredient-check"></div>
+                            <span>1 tsp dried oregano</span>
+                        </div>
+                        <div class="ingredient-item">
+                            <div class="ingredient-check"></div>
+                            <span>Grated parmesan</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="recipe-section">
+                    <h3 class="recipe-section-title">👨‍🍳 Instructions</h3>
+                    <div class="steps-list">
+                        <div class="step-item">
+                            <div class="step-number">1</div>
+                            <div class="step-text">Bring a large pot of salted water to boil. Cook spaghetti according to package instructions.</div>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-number">2</div>
+                            <div class="step-text">Meanwhile, heat olive oil in a large pan. Add onion and garlic, cook until soft (3-4 minutes).</div>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-number">3</div>
+                            <div class="step-text">Add beef mince. Cook until browned, breaking up with a wooden spoon.</div>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-number">4</div>
+                            <div class="step-text">Stir in tomatoes, tomato paste, and oregano. Simmer for 20 minutes.</div>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-number">5</div>
+                            <div class="step-text">Drain pasta and toss with sauce. Serve with grated parmesan.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="recipe-section">
+                    <h3 class="recipe-section-title">💡 Tips</h3>
+                    <p style="font-size: 18px; line-height: 1.6; color: #ccc;">
+                        For extra flavor, add a splash of red wine to the sauce. 
+                        This dish tastes even better the next day - perfect for leftovers!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Navigation
+        function showView(viewName) {
+            document.querySelectorAll('.content-view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById(viewName + '-view').classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+        
+        // Recipe Detail Modal
+        function showRecipeDetail(recipeId) {
+            document.getElementById('recipeModal').classList.add('active');
+        }
+        
+        function closeRecipeDetail() {
+            document.getElementById('recipeModal').classList.remove('active');
+        }
+        
+        // Ingredient checklist
+        document.querySelectorAll('.ingredient-check').forEach(check => {
+            check.addEventListener('click', () => {
+                check.classList.toggle('checked');
+            });
+        });
+        
+        // Search functionality (placeholder)
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            console.log('Searching for:', e.target.value);
+            // TODO: Implement search
+        });
+    </script>
+</body>
+</html>
