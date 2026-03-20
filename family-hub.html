@@ -1037,19 +1037,19 @@
                     
                     const busEl = document.getElementById('next-bus');
                     if (minsUntil < 0) {
-                        busEl.textContent = `Bus ${lineNo} departed`;
+                        busEl.textContent = `${lineNo} departed`;
                         busEl.className = 'next-bus-main';
                     } else if (minsUntil === 0) {
-                        busEl.textContent = `Bus ${lineNo} departing now!`;
+                        busEl.textContent = `${lineNo} departing now!`;
                         busEl.className = 'next-bus-main soon';
                     } else if (minsUntil === 1) {
-                        busEl.textContent = `Bus ${lineNo} in 1 min`;
+                        busEl.textContent = `${lineNo} in 1 min`;
                         busEl.className = 'next-bus-main soon';
                     } else if (minsUntil < 60) {
-                        busEl.textContent = `Bus ${lineNo} in ${minsUntil} mins`;
+                        busEl.textContent = `${lineNo} in ${minsUntil} mins`;
                         busEl.className = minsUntil < 10 ? 'next-bus-main soon' : 'next-bus-main';
                     } else {
-                        busEl.textContent = `Bus ${lineNo} at ${new Date(departureTime).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit', hour12: false })}`;
+                        busEl.textContent = `${lineNo} at ${new Date(departureTime).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit', hour12: false })}`;
                         busEl.className = 'next-bus-main';
                     }
                 } else {
