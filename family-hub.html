@@ -407,6 +407,18 @@
 
         .quick-tile:hover { background: rgba(255, 255, 255, 0.08); }
 
+        .cookbook-link {
+            font-size: 28px;
+            cursor: pointer;
+            margin-top: 8px;
+            padding: 8px;
+            border-radius: 12px;
+            transition: background 0.2s;
+            display: inline-block;
+        }
+
+        .cookbook-link:hover { background: rgba(255, 255, 255, 0.1); }
+
         .quick-label { font-size: 15px; color: var(--subtle); }
         .quick-value { font-size: 18px; font-weight: 600; }
 
@@ -592,6 +604,7 @@
                 <div class="badge">Sydney weather</div>
                 <div class="hero-right-temp" id="weather-temp">--°</div>
                 <div class="hero-right-desc" id="weather-desc">Loading…</div>
+                <div class="cookbook-link" onclick="window.open('cook-book.html', '_blank')" title="Open Cook Book">📖</div>
             </div>
         </header>
 
@@ -638,34 +651,7 @@
                 </div>
             </article>
 
-            <article class="card quick-card">
-                <div class="card-heading">
-                    <div>
-                        <p class="eyebrow">Shortcuts</p>
-                        <h2>Quick actions</h2>
-                    </div>
-                </div>
-                <div class="quick-grid">
-                    <div class="quick-tile" onclick="window.open('https://marvin-commute.vercel.app/api/bus', '_blank')">
-                        <span class="quick-label">Bus API</span>
-                        <span class="quick-value">Live status</span>
-                    </div>
-                    <div class="quick-tile" onclick="window.open('cook-book.html', '_blank')">
-                        <span class="quick-label">Recipe bank</span>
-                        <span class="quick-value">Cook book</span>
-                    </div>
-                    <div class="quick-tile" onclick="toggleFullscreen()">
-                        <span class="quick-label">Display</span>
-                        <span class="quick-value">Fullscreen</span>
-                    </div>
-                    <div class="quick-tile" onclick="fetchWeather()">
-                        <span class="quick-label">Refresh</span>
-                        <span class="quick-value">Weather + bus</span>
-                    </div>
-                </div>
-            </article>
-
-            <article class="card next-days-card">
+            <article class="card next-days-card" style="grid-column: 1 / -1;">
                 <div class="section-title">
                     <div>
                         <p class="eyebrow">Coming up</p>
