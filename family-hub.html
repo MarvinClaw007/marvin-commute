@@ -303,6 +303,175 @@
             color: #fff;
         }
         
+        .edit-btn {
+            background: rgba(0,212,255,0.2);
+            border: 1px solid rgba(0,212,255,0.5);
+            border-radius: 10px;
+            padding: 10px 20px;
+            color: #00d4ff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .edit-btn:hover {
+            background: rgba(0,212,255,0.3);
+        }
+        
+        /* Cook Picker Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .modal-title {
+            font-size: 32px;
+            color: #00d4ff;
+        }
+        
+        .modal-close {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .picker-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .picker-day {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .picker-day-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #00d4ff;
+            margin-bottom: 15px;
+        }
+        
+        .cook-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .cook-option {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .cook-option:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .cook-option.selected {
+            border-color: #00d4ff;
+            background: rgba(0,212,255,0.2);
+        }
+        
+        .cook-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .cook-avatar.jim { background: linear-gradient(135deg, #00d4ff, #7b2cbf); }
+        .cook-avatar.nic { background: linear-gradient(135deg, #ff6b6b, #feca57); }
+        .cook-avatar.sophie { background: linear-gradient(135deg, #a29bfe, #6c5ce7); }
+        .cook-avatar.lilly { background: linear-gradient(135deg, #fd79a8, #e84393); }
+        
+        .cook-name {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+        
+        .modal-btn {
+            padding: 15px 40px;
+            border-radius: 12px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .modal-btn.cancel {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+        }
+        
+        .modal-btn.save {
+            background: rgba(0,212,255,0.2);
+            border: 1px solid #00d4ff;
+            color: #00d4ff;
+        }
+        
+        .modal-btn:hover {
+            transform: translateY(-2px);
+        }
+        
         /* Status Indicators */
         .status-dot {
             width: 12px;
@@ -368,9 +537,12 @@
         
         <!-- Weekly Meal Plan Panel -->
         <div class="panel" style="grid-column: 1 / -1;">
-            <div class="panel-header">
-                <span class="panel-icon">📅</span>
-                <span class="panel-title">This Week's Meals</span>
+            <div class="panel-header" style="justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span class="panel-icon">📅</span>
+                    <span class="panel-title">This Week's Meals</span>
+                </div>
+                <button class="edit-btn" onclick="openCookPicker()">✏️ Edit</button>
             </div>
             <div class="panel-content">
                 <div class="week-grid">
@@ -458,6 +630,169 @@
                         <strong>Last Update:</strong> <span id="last-update">--</span>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cook Picker Modal -->
+    <div class="modal-overlay" id="cookModal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">Who's Cooking This Week?</span>
+                <button class="modal-close" onclick="closeCookPicker()">✕</button>
+            </div>
+            <div class="picker-grid">
+                <div class="picker-day">
+                    <div class="picker-day-name">Mon</div>
+                    <div class="cook-options">
+                        <div class="cook-option" onclick="selectCook(this, 'mon', 'Jim')">
+                            <div class="cook-avatar jim">J</div>
+                            <span class="cook-name">Jim</span>
+                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'mon', 'Nicola')">
+                            <div class="cook-avatar nic">N</div>
+                            <span class="cook-name">Nic</span>
+                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'mon', 'Sophie')">
+                            <div class="cook-avatar sophie">S</div>
+                            <span class="cook-name">Sophie</span>
+                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'mon', 'Lilly')">
+                            <div class="cook-avatar lilly">L</div>
+                            <span class="cook-name">Lilly</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="picker-day">
+                    <div class="picker-day-name">Tue</div>
+                    <div class="cook-options">
+                        <div class="cook-option" onclick="selectCook(this, 'tue', 'Jim')">
+                            <div class="cook-avatar jim">J</div>
+                            <span class="cook-name">Jim</span>
+                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'tue', 'Nicola')">
+                            <div class="cook-avatar nic">N</div>
+                            <span class="cook-name">Nic</span>
+                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'tue', 'Sophie')">
+                            <div class="cook-avatar sophie">S</div>
+                            <span class="cook-name">Sophie</span>
+                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'tue', 'Lilly')">
+                            <div class="cook-avatar lilly">L</div>
+                            <span class="cook-name">Lilly</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="picker-day">
+                    <div class="picker-day-name">Wed</div>
+                    <div class="cook-options">
+                        <div class="cook-option" onclick="selectCook(this, 'wed', 'Jim')">
+                            <div class="cook-avatar jim">J</div>
+                            <span class="cook-name">Jim</span>
+                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'wed', 'Nicola')">
+                            <div class="cook-avatar nic">N</div>
+                            <span class="cook-name">Nic</span>
+                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'wed', 'Sophie')">
+                            <div class="cook-avatar sophie">S</div>
+                            <span class="cook-name">Sophie</span>
+                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'wed', 'Lilly')">
+                            <div class="cook-avatar lilly">L</div>
+                            <span class="cook-name">Lilly</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="picker-day">
+                    <div class="picker-day-name">Thu</div>
+                    <div class="cook-options">
+                        <div class="cook-option" onclick="selectCook(this, 'thu', 'Jim')">
+                            <div class="cook-avatar jim">J</div>
+                            <span class="cook-name">Jim</span>
+                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'thu', 'Nicola')">
+                            <div class="cook-avatar nic">N</div>
+                            <span class="cook-name">Nic</span>
+                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'thu', 'Sophie')">
+                            <div class="cook-avatar sophie">S</div>
+                            <span class="cook-name">Sophie</span>
+                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'thu', 'Lilly')">
+                            <div class="cook-avatar lilly">L</div>
+                            <span class="cook-name">Lilly</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="picker-day">
+                    <div class="picker-day-name">Fri</div>
+                    <div class="cook-options">
+                        <div class="cook-option" onclick="selectCook(this, 'fri', 'Jim')">
+                            <div class="cook-avatar jim">J</div>
+                            <span class="cook-name">Jim</span>
+                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'fri', 'Nicola')">
+                            <div class="cook-avatar nic">N</div>
+                            <span class="cook-name">Nic</span>
+                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'fri', 'Sophie')">
+                            <div class="cook-avatar sophie">S</div>
+                            <span class="cook-name">Sophie</span>
+                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'fri', 'Lilly')">
+                            <div class="cook-avatar lilly">L</div>
+                            <span class="cook-name">Lilly</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="picker-day">
+                    <div class="picker-day-name">Sat</div>
+                    <div class="cook-options">
+                        <div class="cook-option" onclick="selectCook(this, 'sat', 'Jim')">
+                            <div class="cook-avatar jim">J</div>
+                            <span class="cook-name">Jim</span>
+                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'sat', 'Nicola')">
+                            <div class="cook-avatar nic">N</div>
+                            <span class="cook-name">Nic</span>
+                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'sat', 'Sophie')">
+                            <div class="cook-avatar sophie">S</div>
+                            <span class="cook-name">Sophie</span>
+                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'sat', 'Lilly')">
+                            <div class="cook-avatar lilly">L</div>
+                            <span class="cook-name">Lilly</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="picker-day">
+                    <div class="picker-day-name">Sun</div>
+                    <div class="cook-options">
+                        <div class="cook-option" onclick="selectCook(this, 'sun', 'Jim')">
+                            <div class="cook-avatar jim">J</div>
+                            <span class="cook-name">Jim</span>
+                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'sun', 'Nicola')">
+                            <div class="cook-avatar nic">N</div>
+                            <span class="cook-name">Nic</span>
+                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'sun', 'Sophie')">
+                            <div class="cook-avatar sophie">S</div>
+                            <span class="cook-name">Sophie</span>
+                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'sun', 'Lilly')">
+                            <div class="cook-avatar lilly">L</div>
+                            <span class="cook-name">Lilly</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeCookPicker()">Cancel</button>
+                <button class="modal-btn save" onclick="saveCooks()">Save Changes</button>
             </div>
         </div>
     </div>
@@ -576,6 +911,75 @@
                 console.log('Wake lock not granted:', err);
             });
         }
+        
+        // Cook Picker Functions
+        let selectedCooks = {};
+        
+        function openCookPicker() {
+            document.getElementById('cookModal').classList.add('active');
+            // Pre-select current cooks based on displayed schedule
+            const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+            days.forEach(day => {
+                const dayCard = document.querySelector(`.day-card:nth-child(${days.indexOf(day) + 1})`);
+                if (dayCard) {
+                    const cookName = dayCard.querySelector('.day-cook').textContent;
+                    selectedCooks[day] = cookName;
+                }
+            });
+        }
+        
+        function closeCookPicker() {
+            document.getElementById('cookModal').classList.remove('active');
+        }
+        
+        function selectCook(element, day, cook) {
+            // Remove selected class from all options for this day
+            const dayOptions = element.parentElement.querySelectorAll('.cook-option');
+            dayOptions.forEach(opt => opt.classList.remove('selected'));
+            
+            // Add selected class to clicked option
+            element.classList.add('selected');
+            
+            // Store selection
+            selectedCooks[day] = cook;
+        }
+        
+        function saveCooks() {
+            // Update the displayed schedule
+            const dayMap = { 'mon': 0, 'tue': 1, 'wed': 2, 'thu': 3, 'fri': 4, 'sat': 5, 'sun': 6 };
+            
+            Object.entries(selectedCooks).forEach(([day, cook]) => {
+                const dayCards = document.querySelectorAll('.day-card');
+                const dayIndex = dayMap[day];
+                if (dayCards[dayIndex]) {
+                    dayCards[dayIndex].querySelector('.day-cook').textContent = cook;
+                }
+            });
+            
+            closeCookPicker();
+            
+            // Save to localStorage for persistence
+            localStorage.setItem('familyHubCooks', JSON.stringify(selectedCooks));
+        }
+        
+        // Load saved cooks on startup
+        function loadSavedCooks() {
+            const saved = localStorage.getItem('familyHubCooks');
+            if (saved) {
+                selectedCooks = JSON.parse(saved);
+                const dayMap = { 'mon': 0, 'tue': 1, 'wed': 2, 'thu': 3, 'fri': 4, 'sat': 5, 'sun': 6 };
+                
+                Object.entries(selectedCooks).forEach(([day, cook]) => {
+                    const dayCards = document.querySelectorAll('.day-card');
+                    const dayIndex = dayMap[day];
+                    if (dayCards[dayIndex]) {
+                        dayCards[dayIndex].querySelector('.day-cook').textContent = cook;
+                    }
+                });
+            }
+        }
+        
+        loadSavedCooks();
     </script>
 </body>
 </html>
