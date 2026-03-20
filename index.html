@@ -394,12 +394,17 @@
                 return;
             }
             
+            // Allowed bus routes
+            const allowedRoutes = ['270', '270X', '271', '274'];
+            
             // Filter buses
             const buses = data.stopEvents
                 .filter(event => {
+                    const lineNo = event.transportation?.number || '';
                     const departureTime = new Date(event.departureTimeEstimated || event.departureTimePlanned);
                     const secondsSinceDeparture = (now - departureTime) / 1000;
-                    return secondsSinceDeparture < 15;
+                    const isAllowedRoute = allowedRoutes.includes(lineNo);
+                    return isAllowedRoute && secondsSinceDeparture < 15;
                 })
                 .sort((a, b) => {
                     const timeA = new Date(a.departureTimeEstimated || a.departureTimePlanned);
