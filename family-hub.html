@@ -73,6 +73,25 @@
             text-align: center;
             flex: 1;
         }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .cookbook-icon {
+            font-size: 36px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            padding: 10px;
+            border-radius: 12px;
+        }
+
+        .cookbook-icon:hover {
+            transform: scale(1.1);
+            background: rgba(255,255,255,0.1);
+        }
         
         .next-bus-main {
             font-size: 42px;
@@ -774,28 +793,37 @@
             <div class="header-center">
                 <div class="next-bus-main" id="next-bus">Loading next bus...</div>
             </div>
-            <div class="weather">
-                <div class="weather-temp" id="weather-temp">--°</div>
-                <div class="weather-desc" id="weather-desc">Loading...</div>
+            <div class="header-right">
+                <div class="cookbook-icon" onclick="window.open('cook-book.html', '_blank')" title="Open Cook Book">📖</div>
+                <div class="weather">
+                    <div class="weather-temp" id="weather-temp">--°</div>
+                    <div class="weather-desc" id="weather-desc">Loading...</div>
+                </div>
             </div>
         </div>
         
         <!-- Tonight's Meal Panel -->
         <div class="panel" style="grid-column: 1 / -1;">
-            <div class="panel-header" style="justify-content: space-between;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <span class="panel-icon">🍽️</span>
-                    <span class="panel-title">Tonight's Meal</span>
-                </div>
+            <div class="panel-header" style="justify-content: flex-end;">
                 <button class="edit-btn" onclick="openCookPicker()">✏️ Edit Week</button>
             </div>
             <div class="panel-content">
                 <div class="tonight-meal">
                     <div class="tonight-main">
-                        <div class="tonight-emoji">🐟</div>
+                        <div class="tonight-image">🐟</div>
                         <div class="tonight-info">
                             <div class="tonight-dish">Fish Friday</div>
+                            <div class="tonight-description">Pan-seared barramundi fillets with lemon butter sauce, served on a bed of seasonal greens and roasted chat potatoes. Finished with fresh herbs and a squeeze of lemon.</div>
                             <div class="tonight-cook">Cooked by <span class="cook-badge jim">J</span> Jim</div>
+                        </div>
+                    </div>
+                    <div class="tonight-guests">
+                        <div class="guests-title">Joining for dinner:</div>
+                        <div class="guests-list" id="tonight-guests">
+                            <div class="guest-avatar jim" title="Jim">J</div>
+                            <div class="guest-avatar nic" title="Nicola">N</div>
+                            <div class="guest-avatar sophie" title="Sophie">S</div>
+                            <div class="guest-avatar lilly" title="Lilly">L</div>
                         </div>
                     </div>
                     <div class="tonight-timing">
