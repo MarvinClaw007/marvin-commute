@@ -54,12 +54,17 @@
             font-weight: 500;
             text-decoration: none;
             color: #fff;
-            background: rgba(0,212,255,0.2);
-            border-bottom: 3px solid #00d4ff;
+            background: rgba(255,255,255,0.05);
+            border-bottom: 3px solid transparent;
         }
         
         .tab:hover {
-            background: rgba(0,212,255,0.3);
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .tab.active {
+            background: rgba(0,212,255,0.2);
+            border-bottom: 3px solid #00d4ff;
         }
         
         .content {
@@ -171,11 +176,23 @@
     </div>
     
     <div class="tabs">
-        <a href="/commute.html" class="tab active">→ To City</a>
+        <button class="tab active" onclick="switchTab('to-city')">→ To City</button>
+        <button class="tab" onclick="switchTab('to-home')">→ To Frenchs Forest</button>
     </div>
     
     <div class="content">
-        <div class="stop-header">📍 Glen St opp Frenchs Forest Showground, Belrose</div>
+        <div id="to-city" class="tab-content">
+            <div class="stop-header">📍 Glen St opp Frenchs Forest Showground, Belrose → City</div>
+            <div id="bus-list-city">
+                <div class="loading">Loading bus data...</div>
+            </div>
+        </div>
+        <div id="to-home" class="tab-content" style="display: none;">
+            <div class="stop-header">📍 City → Frenchs Forest</div>
+            <div id="bus-list-home">
+                <div class="loading">Loading bus data...</div>
+            </div>
+        </div>
         
         <div id="bus-list">
             <div class="loading">Loading bus data...</div>
@@ -184,6 +201,7 @@
         <div class="refresh-info">
             <span class="realtime-indicator"></span>Real-time data • Auto-refreshes every 30 seconds
         </div>
+    </div>
     </div>
     
     <script>
@@ -325,27 +343,143 @@
             });
         }
         
-        async function fetchBusData() {
+        // Tab switching
+        let currentTab = 'to-city';
+        let cityBusData = [];
+        let homeBusData = [];
+        
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Show/hide content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            document.getElementById(tab).style.display = 'block';
+            
+            // Fetch data for the selected tab
+            if (tab === 'to-city') {
+                fetchBusData('208560', 'city');
+            } else {
+                fetchBusData('2000220', 'home');
+            }
+        }
+        
+        async function fetchBusData(stopId, direction) {
+            const containerId = direction === 'city' ? 'bus-list-city' : 'bus-list-home';
+            const container = document.getElementById(containerId);
+            
             try {
-                const response = await fetch(API_URL);
+                const response = await fetch(`/api/bus?stop=${stopId}`);
                 if (!response.ok) throw new Error('Failed to fetch');
                 const data = await response.json();
-                renderBuses(data);
+                renderBuses(data, direction);
             } catch (error) {
                 console.error('Error fetching bus data:', error);
-                document.getElementById('bus-list').innerHTML = 
-                    '<div class="error">Failed to load bus data. Retrying...</div>';
+                container.innerHTML = '<div class="error">Failed to load bus data. Retrying...</div>';
             }
+        }
+        
+        function renderBuses(data, direction) {
+            const containerId = direction === 'city' ? 'bus-list-city' : 'bus-list-home';
+            const container = document.getElementById(containerId);
+            const now = new Date();
+            
+            if (!data.stopEvents || data.stopEvents.length === 0) {
+                container.innerHTML = '<div class="error">No bus data available</div>';
+                return;
+            }
+            
+            // Filter buses
+            const buses = data.stopEvents
+                .filter(event => {
+                    const departureTime = new Date(event.departureTimeEstimated || event.departureTimePlanned);
+                    const secondsSinceDeparture = (now - departureTime) / 1000;
+                    return secondsSinceDeparture < 15;
+                })
+                .sort((a, b) => {
+                    const timeA = new Date(a.departureTimeEstimated || a.departureTimePlanned);
+                    const timeB = new Date(b.departureTimeEstimated || b.departureTimePlanned);
+                    return timeA - timeB;
+                })
+                .slice(0, 5);
+            
+            if (buses.length === 0) {
+                container.innerHTML = '<div class="error">No buses found</div>';
+                return;
+            }
+            
+            container.innerHTML = buses.map((event, index) => {
+                const transport = event.transportation || {};
+                const lineNo = transport.number || '?';
+                const destination = transport.destination?.name || 'Unknown';
+                const departureTime = event.departureTimeEstimated || event.departureTimePlanned;
+                const isRealtime = event.isRealtimeControlled;
+                const minsUntil = getMinutesUntil(departureTime);
+                const countdownClass = getCountdownClass(minsUntil);
+                const countdownText = formatCountdown(minsUntil);
+                const busId = `${direction}-bus-${index}`;
+                
+                return `
+                    <div class="bus-card" data-departure="${departureTime}">
+                        <div class="bus-header">
+                            <div>
+                                <div class="bus-number">${lineNo}</div>
+                                <div class="bus-destination">${isRealtime ? '<span class="realtime-indicator"></span>' : ''}${destination}</div>
+                            </div>
+                            <div class="countdown ${countdownClass}" id="${busId}">${countdownText}</div>
+                        </div>
+                        <div class="arrival-info">
+                            <span style="color: #00d4ff;">🚌 Departs:</span> ${formatTime(departureTime)}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Store data for countdown updates
+            const busDataArray = buses.map((event, index) => ({
+                id: `${direction}-bus-${index}`,
+                departure: event.departureTimeEstimated || event.departureTimePlanned
+            }));
+            
+            if (direction === 'city') {
+                cityBusData = busDataArray;
+            } else {
+                homeBusData = busDataArray;
+            }
+        }
+        
+        function updateAllCountdowns() {
+            [...cityBusData, ...homeBusData].forEach(bus => {
+                const el = document.getElementById(bus.id);
+                if (!el) return;
+                
+                const minsUntil = getMinutesUntil(bus.departure);
+                el.className = 'countdown ' + getCountdownClass(minsUntil);
+                el.textContent = formatCountdown(minsUntil);
+            });
         }
         
         // Initialize
         updateClock();
         setInterval(updateClock, 1000);
         
-        fetchBusData();
-        setInterval(fetchBusData, 30000);
+        // Initial data load
+        fetchBusData('208560', 'city');
+        fetchBusData('2000220', 'home');
         
-        setInterval(updateCountdowns, 1000);
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            fetchBusData('208560', 'city');
+            fetchBusData('2000220', 'home');
+        }, 30000);
+        
+        // Update countdowns every second
+        setInterval(updateAllCountdowns, 1000);
     </script>
 </body>
 </html>
