@@ -85,23 +85,22 @@
             color: #ffaa00;
         }
         
-        .date {
-            font-size: 20px;
-            color: #888;
+        .time-display {
+            text-align: left;
         }
         
-        /* Clock Bar */
-        .clock-bar {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 10px;
-        }
-        
-        .clock {
+        .time-main {
             font-size: 48px;
             font-weight: 300;
             font-variant-numeric: tabular-nums;
             color: #00d4ff;
+            line-height: 1;
+        }
+        
+        .time-date {
+            font-size: 18px;
+            color: #888;
+            margin-top: 5px;
         }
         
         .weather {
@@ -576,7 +575,10 @@
         <!-- Header -->
         <div class="header">
             <div class="header-left">
-                <div class="date" id="date">Loading...</div>
+                <div class="time-display">
+                    <div class="time-main" id="clock">--:--</div>
+                    <div class="time-date" id="date">Loading...</div>
+                </div>
             </div>
             <div class="header-center">
                 <div class="next-bus-main" id="next-bus">Loading next bus...</div>
@@ -585,11 +587,6 @@
                 <div class="weather-temp" id="weather-temp">--°</div>
                 <div class="weather-desc" id="weather-desc">Loading...</div>
             </div>
-        </div>
-        
-        <!-- Clock Bar -->
-        <div class="clock-bar">
-            <div class="clock" id="clock">--:--</div>
         </div>
         
         <!-- Weekly Meal Plan Panel -->
