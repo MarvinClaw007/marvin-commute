@@ -242,9 +242,10 @@
             return '';
         }
         
-        function formatCountdown(mins) {
+        function formatCountdown(mins, departureTime) {
             if (mins < 0) return 'Departed';
             if (mins === 0) return 'Now';
+            if (mins > 60) return formatTime(departureTime); // Show HH:MM if > 60 mins
             return `${mins} min`;
         }
         
@@ -426,7 +427,7 @@
                 const isRealtime = event.isRealtimeControlled;
                 const minsUntil = getMinutesUntil(departureTime);
                 const countdownClass = getCountdownClass(minsUntil);
-                const countdownText = formatCountdown(minsUntil);
+                const countdownText = formatCountdown(minsUntil, departureTime);
                 const busId = `${direction}-bus-${index}`;
                 
                 return `
@@ -465,7 +466,7 @@
                 
                 const minsUntil = getMinutesUntil(bus.departure);
                 el.className = 'countdown ' + getCountdownClass(minsUntil);
-                el.textContent = formatCountdown(minsUntil);
+                el.textContent = formatCountdown(minsUntil, bus.departure);
             });
         }
         
