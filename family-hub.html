@@ -1,1023 +1,829 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>Family Hub</title>
     <style>
+        :root {
+            --bg: #02060e;
+            --panel: rgba(255, 255, 255, 0.08);
+            --border: rgba(255, 255, 255, 0.12);
+            --text: #f5f7fb;
+            --subtle: rgba(255, 255, 255, 0.6);
+            --accent: #7c5dff;
+            --accent-soft: rgba(124, 93, 255, 0.18);
+            --green: #52ffa8;
+            --amber: #ffb347;
+            --danger: #ff6b6b;
+            --card-blur: blur(20px);
+            font-family: "Inter", "SF Pro Display", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
         * {
-            margin: 0;
-            padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: #fff;
+            margin: 0;
             min-height: 100vh;
-            overflow: hidden;
-            touch-action: manipulation;
+            background: radial-gradient(circle at 20% 20%, rgba(124, 93, 255, 0.25), transparent 40%),
+                        radial-gradient(circle at 80% 0%, rgba(0, 255, 163, 0.16), transparent 45%),
+                        linear-gradient(135deg, #03050b, #050915 60%, #03060f);
+            color: var(--text);
+            font-family: var(--font, "Inter", system-ui);
+            -webkit-font-smoothing: antialiased;
+            position: relative;
+            overflow-x: hidden;
         }
-        
-        .hub-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: auto 1fr 1fr;
-            gap: 20px;
-            padding: 20px;
-            height: 100vh;
-            max-width: 1366px;
+
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background: url("data:image/svg+xml,%3Csvg width='160' height='160' viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-opacity='0.05'%3E%3Cpath d='M0 0h80v80H0zM80 80h80v80H80z'/%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.4;
+        }
+
+        .canvas {
+            max-width: 1380px;
             margin: 0 auto;
-        }
-        
-        /* Header */
-        .header {
-            grid-column: 1 / -1;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 30px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .header-left {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        
-        .clock {
-            font-size: 72px;
-            font-weight: 300;
-            font-variant-numeric: tabular-nums;
-            color: #00d4ff;
-            line-height: 1;
-        }
-        
-        .next-bus {
-            font-size: 18px;
-            color: #00ff88;
-            font-weight: 500;
-        }
-        
-        .next-bus.soon {
-            color: #ffaa00;
-        }
-        
-        .header-center {
-            text-align: center;
-            flex: 1;
+            padding: 32px clamp(18px, 4vw, 48px) 64px;
+            position: relative;
+            z-index: 1;
         }
 
-        .header-right {
-            display: flex;
+        .hero {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
             align-items: center;
-            gap: 30px;
         }
 
-        .cookbook-icon {
-            font-size: 36px;
-            cursor: pointer;
-            transition: transform 0.2s;
-            padding: 10px;
-            border-radius: 12px;
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 28px;
+            backdrop-filter: var(--card-blur);
+            box-shadow: 0 20px 60px rgba(2, 6, 14, 0.65);
         }
 
-        .cookbook-icon:hover {
-            transform: scale(1.1);
-            background: rgba(255,255,255,0.1);
-        }
-        
-        .next-bus-main {
-            font-size: 42px;
-            font-weight: 600;
-            color: #00ff88;
-            text-align: center;
-        }
-        
-        .next-bus-main.soon {
-            color: #ffaa00;
-        }
-        
-        .time-display {
-            text-align: left;
-        }
-        
-        .time-main {
-            font-size: 48px;
-            font-weight: 300;
-            font-variant-numeric: tabular-nums;
-            color: #00d4ff;
-            line-height: 1;
-        }
-        
-        .time-date {
-            font-size: 18px;
-            color: #888;
-            margin-top: 5px;
-        }
-        
-        .weather {
-            text-align: right;
-        }
-        
-        .weather-temp {
-            font-size: 48px;
-            font-weight: 300;
-            color: #00d4ff;
-        }
-        
-        .weather-desc {
-            font-size: 18px;
-            color: #888;
-        }
-        
-        /* Panels */
-        .panel {
-            background: rgba(255,255,255,0.05);
-            border-radius: 20px;
-            padding: 25px;
-            border: 1px solid rgba(255,255,255,0.1);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .panel-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .panel-icon {
-            font-size: 32px;
-        }
-        
-        .panel-title {
-            font-size: 24px;
-            font-weight: 600;
-            color: #00d4ff;
-        }
-        
-        .panel-content {
-            flex: 1;
-            overflow-y: auto;
-        }
-        
-        /* Bus Panel */
-        .bus-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        
-        .bus-tab {
-            flex: 1;
-            padding: 12px 20px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 10px;
-            color: #fff;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .bus-tab.active {
-            background: rgba(0,212,255,0.2);
-            border-color: #00d4ff;
-        }
-        
-        .bus-card {
-            background: rgba(255,255,255,0.03);
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .bus-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .bus-number {
-            font-size: 36px;
-            font-weight: 700;
-            color: #00d4ff;
-            min-width: 60px;
-        }
-        
-        .bus-dest {
-            font-size: 18px;
-            color: #ccc;
-        }
-        
-        .bus-time {
-            font-size: 42px;
-            font-weight: 300;
-            color: #00ff88;
-            font-variant-numeric: tabular-nums;
-        }
-        
-        .bus-time.soon {
-            color: #ffaa00;
-        }
-        
-        .bus-time.departed {
-            color: #ff4444;
-        }
-        
-        /* Family Panel */
-        .family-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-        
-        .family-member {
-            background: rgba(255,255,255,0.03);
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .family-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            border: 3px solid #00d4ff;
-            margin-bottom: 10px;
-            object-fit: cover;
-        }
-        
-        .family-name {
-            font-size: 20px;
-            font-weight: 600;
-            color: #fff;
-        }
-        
-        .family-status {
-            font-size: 14px;
-            color: #888;
-            margin-top: 5px;
-        }
-        
-        /* Quick Actions */
-        .actions-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-        
-        .action-btn {
-            background: rgba(0,212,255,0.1);
-            border: 1px solid rgba(0,212,255,0.3);
-            border-radius: 12px;
-            padding: 25px;
-            color: #fff;
-            font-size: 18px;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .action-btn:hover {
-            background: rgba(0,212,255,0.2);
-        }
-        
-        .action-icon {
-            font-size: 36px;
-        }
-        
-        /* Weekly Meal Plan */
-        .week-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 15px;
-            height: 100%;
-        }
-        
-        .day-card {
-            background: rgba(255,255,255,0.03);
-            border-radius: 16px;
-            padding: 20px;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            gap: 10px;
-            border: 2px solid transparent;
-            transition: all 0.3s;
-        }
-        
-        .day-card.today {
-            border-color: #00d4ff;
-            background: rgba(0,212,255,0.1);
-        }
-        
-        .day-name {
-            font-size: 24px;
-            font-weight: 700;
-            color: #00d4ff;
+        .eyebrow {
+            font-size: 13px;
             text-transform: uppercase;
-        }
-        
-        .day-cook {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .day-cook-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            font-size: 24px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-        }
-        
-        .day-cook-avatar.jim { background: linear-gradient(135deg, #00d4ff, #7b2cbf); }
-        .day-cook-avatar.nic { background: linear-gradient(135deg, #ff6b6b, #feca57); }
-        .day-cook-avatar.sophie { background: linear-gradient(135deg, #a29bfe, #6c5ce7); }
-        .day-cook-avatar.lilly { background: linear-gradient(135deg, #fd79a8, #e84393); }
-        .day-cook-avatar.family { background: linear-gradient(135deg, #00b894, #00cec9); }
-        
-        /* Meals Preview Grid */
-        .meals-preview-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-        }
-        
-        .meal-preview-card {
-            background: rgba(255,255,255,0.03);
-            border-radius: 16px;
-            padding: 25px;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .meal-day {
-            font-size: 20px;
-            font-weight: 700;
-            color: #00d4ff;
-            text-transform: uppercase;
-        }
-        
-        .meal-cook-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            font-size: 28px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-        }
-        
-        .meal-cook-avatar.jim { background: linear-gradient(135deg, #00d4ff, #7b2cbf); }
-        .meal-cook-avatar.nic { background: linear-gradient(135deg, #ff6b6b, #feca57); }
-        .meal-cook-avatar.sophie { background: linear-gradient(135deg, #a29bfe, #6c5ce7); }
-        .meal-cook-avatar.lilly { background: linear-gradient(135deg, #fd79a8, #e84393); }
-        .meal-cook-avatar.family { background: linear-gradient(135deg, #00b894, #00cec9); }
-        
-        .meal-name {
-            font-size: 24px;
-            color: #fff;
-        }
-        
-        .meal-status {
-            font-size: 14px;
-            color: #888;
-            padding: 5px 15px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 20px;
-        }
-        
-        .meal-status.pending {
-            color: #ffaa00;
-        }
-        
-        .meal-status.done {
-            color: #00ff88;
-        }
-
-        /* Tonight's Meal */
-        .tonight-meal {
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
-
-        .tonight-main {
-            display: flex;
-            align-items: center;
-            gap: 30px;
-            padding: 30px;
-            background: rgba(0,212,255,0.1);
-            border: 2px solid rgba(0,212,255,0.3);
-            border-radius: 20px;
-        }
-
-        .tonight-emoji {
-            font-size: 80px;
-        }
-
-        .tonight-info {
-            flex: 1;
-        }
-
-        .tonight-dish {
-            font-size: 36px;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 10px;
-        }
-
-        .tonight-cook {
-            font-size: 20px;
-            color: #888;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .cook-badge {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            font-size: 16px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-        }
-
-        .cook-badge.jim { background: linear-gradient(135deg, #00d4ff, #7b2cbf); }
-        .cook-badge.nic { background: linear-gradient(135deg, #ff6b6b, #feca57); }
-        .cook-badge.sophie { background: linear-gradient(135deg, #a29bfe, #6c5ce7); }
-        .cook-badge.lilly { background: linear-gradient(135deg, #fd79a8, #e84393); }
-        .cook-badge.family { background: linear-gradient(135deg, #00b894, #00cec9); }
-
-        .tonight-timing {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 30px;
-            padding: 20px;
-            background: rgba(255,255,255,0.03);
-            border-radius: 16px;
-        }
-
-        .time-block {
-            text-align: center;
-        }
-
-        .time-label {
-            font-size: 14px;
-            color: #888;
-            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--subtle);
             margin-bottom: 8px;
         }
 
-        .time-value {
-            font-size: 32px;
-            font-weight: 700;
-            color: #00d4ff;
+        .hero-time {
+            font-size: clamp(52px, 6vw, 84px);
+            font-weight: 500;
+            line-height: 1;
         }
 
-        .time-arrow {
-            font-size: 32px;
-            color: #888;
-        }
-
-        .time-remaining {
+        .hero-date {
             font-size: 18px;
-            color: #00ff88;
+            color: var(--subtle);
+            margin-top: 6px;
+        }
+
+        .hero-kicker {
+            font-size: 15px;
+            color: var(--subtle);
+            margin-top: 12px;
+        }
+
+        .hero-mid .badge,
+        .hero-right .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            letter-spacing: 0.2em;
+            color: var(--subtle);
+            text-transform: uppercase;
+        }
+
+        .hero-mid-value {
+            margin-top: 12px;
+            font-size: clamp(36px, 4vw, 48px);
             font-weight: 600;
-            margin-left: 20px;
+            color: var(--green);
         }
 
-        .tonight-actions {
+        .hero-mid-value.soon { color: var(--amber); }
+        .hero-mid-value.late { color: var(--danger); }
+
+        .hero-right-temp {
+            margin-top: 12px;
+            font-size: clamp(40px, 4vw, 56px);
+            font-weight: 500;
+            color: #7ed3ff;
+        }
+
+        .hero-right-desc {
+            font-size: 17px;
+            color: var(--subtle);
+        }
+
+        .meta-row {
+            margin-top: 12px;
+            font-size: 14px;
+            color: var(--subtle);
+        }
+
+        .meta-row span { color: var(--text); }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .grid-span-2 {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 900px) {
+            .grid-span-2 {
+                grid-column: span 1;
+            }
+        }
+
+        .card-heading {
             display: flex;
-            gap: 15px;
-            justify-content: center;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
         }
 
-        .tonight-btn {
-            background: rgba(0,212,255,0.2);
-            border: 1px solid rgba(0,212,255,0.5);
-            border-radius: 12px;
-            padding: 15px 30px;
-            color: #00d4ff;
-            font-size: 16px;
+        .card-heading h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .pill {
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--subtle);
+            font-size: 13px;
+            letter-spacing: 0.2em;
+        }
+
+        .ghost-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 16px;
+            border-radius: 999px;
+            font-size: 14px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: border-color 0.2s, transform 0.2s;
         }
 
-        .tonight-btn:hover {
-            background: rgba(0,212,255,0.3);
+        .ghost-btn:hover {
+            border-color: var(--accent);
+            transform: translateY(-1px);
         }
 
-        /* Next 3 Days */
-        .next-days-title {
-            font-size: 20px;
-            color: #888;
-            margin: 20px 0 15px 0;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255,255,255,0.1);
+        .tonight-card {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
-        
-        .day-meal {
+
+        .tonight-hero {
+            display: grid;
+            grid-template-columns: minmax(80px, 120px) 1fr;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .tonight-emoji {
+            font-size: 64px;
+            width: 100px;
+            height: 100px;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.08);
+            display: grid;
+            place-items: center;
+        }
+
+        .tonight-dish {
+            margin: 0 0 8px;
+            font-size: 32px;
+            font-weight: 600;
+        }
+
+        .tonight-description {
+            margin: 0 0 12px;
+            color: var(--subtle);
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .tonight-cook {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 17px;
+            color: var(--subtle);
+        }
+
+        .cook-chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .chip-jim { background: linear-gradient(135deg, #3ecbff, #5f6bff); }
+        .chip-nic { background: linear-gradient(135deg, #ff8a66, #ffd166); }
+        .chip-sophie { background: linear-gradient(135deg, #c77dff, #6366f1); }
+        .chip-lilly { background: linear-gradient(135deg, #ff6fb1, #ff4f81); }
+        .chip-family { background: linear-gradient(135deg, #13c4a3, #20bf55); }
+
+        .guest-strip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .guest-chip {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
             font-size: 20px;
+            font-weight: 600;
             color: #fff;
         }
-        
-        .edit-btn {
-            background: rgba(0,212,255,0.2);
-            border: 1px solid rgba(0,212,255,0.5);
-            border-radius: 10px;
-            padding: 10px 20px;
-            color: #00d4ff;
+
+        .guest-chip.jim { background: linear-gradient(135deg, #3ecbff, #5f6bff); }
+        .guest-chip.nic { background: linear-gradient(135deg, #ff8a66, #ffd166); }
+        .guest-chip.sophie { background: linear-gradient(135deg, #c77dff, #6366f1); }
+        .guest-chip.lilly { background: linear-gradient(135deg, #ff6fb1, #ff4f81); }
+
+        .timeline {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 18px;
+            padding: 18px 22px;
+            align-items: center;
+        }
+
+        .timeline-block {
+            text-align: center;
+        }
+
+        .timeline-label {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--subtle);
+            margin-bottom: 6px;
+        }
+
+        .timeline-value {
+            font-size: 26px;
+            font-weight: 600;
+        }
+
+        .timeline-status {
+            text-align: right;
             font-size: 16px;
+            font-weight: 600;
+            color: var(--green);
+        }
+
+        .action-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .primary-btn,
+        .secondary-btn {
+            border: none;
+            border-radius: 14px;
+            padding: 14px 24px;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-        
-        .edit-btn:hover {
-            background: rgba(0,212,255,0.3);
+
+        .primary-btn {
+            background: linear-gradient(120deg, #7c5dff, #55ffe0);
+            color: #05111f;
+            box-shadow: 0 15px 35px rgba(124, 93, 255, 0.35);
         }
-        
-        /* Cook Picker Modal */
+
+        .secondary-btn {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+        }
+
+        .primary-btn:hover,
+        .secondary-btn:hover { transform: translateY(-1px); }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+        }
+
+        .preview-card {
+            border-radius: 18px;
+            padding: 18px;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: center;
+        }
+
+        .preview-day {
+            font-size: 14px;
+            letter-spacing: 0.2em;
+            color: var(--subtle);
+        }
+
+        .preview-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 18px;
+            display: grid;
+            place-items: center;
+            margin: 0 auto;
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .preview-label {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .quick-card .quick-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .quick-tile {
+            border-radius: 18px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .quick-tile:hover { background: rgba(255, 255, 255, 0.08); }
+
+        .quick-label { font-size: 15px; color: var(--subtle); }
+        .quick-value { font-size: 18px; font-weight: 600; }
+
+        .week-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 14px;
+        }
+
+        .day-card {
+            border-radius: 18px;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.04);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .day-card.today {
+            border: 1px solid var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .day-label {
+            font-size: 13px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--subtle);
+        }
+
+        .day-cook {
+            min-height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .day-cook-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+            color: #fff;
+            font-size: 20px;
+        }
+
+        .day-note {
+            font-size: 14px;
+            color: var(--subtle);
+            min-height: 34px;
+        }
+
         .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.8);
+            inset: 0;
+            background: rgba(2, 6, 14, 0.85);
             display: none;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             z-index: 1000;
         }
-        
-        .modal-overlay.active {
-            display: flex;
-        }
-        
+
+        .modal-overlay.active { display: flex; }
+
         .modal {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 30px;
-            width: 90%;
-            max-width: 800px;
+            width: min(900px, 94vw);
             max-height: 90vh;
-            overflow-y: auto;
+            overflow: auto;
+            border-radius: 28px;
+            background: #060b18;
+            border: 1px solid var(--border);
+            padding: 32px;
+            box-shadow: 0 40px 120px rgba(0, 0, 0, 0.65);
         }
-        
+
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 24px;
         }
-        
+
         .modal-title {
-            font-size: 32px;
-            color: #00d4ff;
+            font-size: 28px;
+            margin: 0;
         }
-        
+
         .modal-close {
-            background: rgba(255,255,255,0.1);
-            border: none;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            color: #fff;
-            font-size: 24px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text);
+            font-size: 20px;
             cursor: pointer;
         }
-        
+
         .picker-grid {
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 14px;
+            margin-bottom: 24px;
         }
-        
+
         .picker-day {
-            background: rgba(255,255,255,0.05);
-            border-radius: 16px;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .picker-day-name {
-            font-size: 20px;
-            font-weight: 700;
-            color: #00d4ff;
-            margin-bottom: 15px;
-        }
-        
-        .cook-options {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 18px;
+            padding: 16px;
             display: flex;
             flex-direction: column;
+            gap: 12px;
+        }
+
+        .picker-day-name {
+            font-size: 16px;
+            letter-spacing: 0.2em;
+            color: var(--subtle);
+        }
+
+        .cook-options {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 10px;
         }
-        
+
         .cook-option {
-            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.02);
             border: 2px solid transparent;
-            border-radius: 12px;
-            padding: 15px;
+            display: grid;
+            place-items: center;
             cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            transition: border-color 0.2s, transform 0.2s;
         }
-        
-        .cook-option:hover {
-            background: rgba(255,255,255,0.1);
-        }
-        
-        .cook-option.selected {
-            border-color: #00d4ff;
-            background: rgba(0,212,255,0.2);
-        }
-        
-        .cook-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            font-size: 24px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .cook-avatar.jim { background: linear-gradient(135deg, #00d4ff, #7b2cbf); }
-        .cook-avatar.nic { background: linear-gradient(135deg, #ff6b6b, #feca57); }
-        .cook-avatar.sophie { background: linear-gradient(135deg, #a29bfe, #6c5ce7); }
-        .cook-avatar.lilly { background: linear-gradient(135deg, #fd79a8, #e84393); }
-        
-        .cook-option.not-eating .cook-avatar {
-            opacity: 0.3;
-            filter: grayscale(100%);
-        }
-        
-        .cook-option.not-eating {
-            background: rgba(255,255,255,0.02);
-        }
-        
-        .cook-name {
-            font-size: 18px;
-            font-weight: 600;
-        }
-        
+
+        .cook-option.selected { border-color: var(--accent); transform: translateY(-2px); }
+        .cook-option.not-eating { opacity: 0.35; border-style: dashed; }
+
         .modal-actions {
             display: flex;
             justify-content: flex-end;
-            gap: 15px;
+            gap: 12px;
         }
-        
+
         .modal-btn {
-            padding: 15px 40px;
-            border-radius: 12px;
-            font-size: 18px;
+            border-radius: 999px;
+            padding: 12px 28px;
+            font-size: 15px;
+            border: 1px solid transparent;
             cursor: pointer;
-            transition: all 0.3s;
         }
-        
-        .modal-btn.cancel {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: #fff;
-        }
-        
-        .modal-btn.save {
-            background: rgba(0,212,255,0.2);
-            border: 1px solid #00d4ff;
-            color: #00d4ff;
-        }
-        
-        .modal-btn:hover {
-            transform: translateY(-2px);
-        }
-        
-        /* Status Indicators */
-        .status-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #4ade80;
-            animation: pulse 2s infinite;
-            display: inline-block;
-            margin-right: 8px;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        /* Scrollbar styling */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: rgba(255,255,255,0.05);
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.2);
-            border-radius: 3px;
-        }
-        
-        /* No data message */
-        .no-data {
-            text-align: center;
-            color: #666;
-            padding: 40px;
-            font-size: 18px;
-        }
-        
-        /* Kiosk mode - hide scrollbars but keep functionality */
-        @media screen and (display-mode: fullscreen) {
-            ::-webkit-scrollbar {
-                display: none;
-            }
+
+        .modal-btn.cancel { background: rgba(255, 255, 255, 0.08); color: var(--text); border-color: var(--border); }
+        .modal-btn.save { background: linear-gradient(120deg, #7c5dff, #55ffe0); color: #031322; }
+
+        @media (max-width: 640px) {
+            .hero { grid-template-columns: 1fr; }
+            .hero-time { font-size: 48px; }
+            .tonight-hero { grid-template-columns: 1fr; }
+            .timeline { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
 <body>
-    <div class="hub-container">
-        <!-- Header -->
-        <div class="header">
-            <div class="header-left">
-                <div class="time-display">
-                    <div class="time-main" id="clock">--:--</div>
-                    <div class="time-date" id="date">Loading...</div>
+    <main class="canvas">
+        <header class="hero card">
+            <div>
+                <div class="eyebrow">Today</div>
+                <div class="hero-time" id="clock">--:--</div>
+                <div class="hero-date" id="date">Saturday, 21 March</div>
+                <div class="hero-kicker">Kitchen kiosk · Family Command Centre</div>
+            </div>
+            <div class="hero-mid">
+                <div class="badge">Next bus</div>
+                <div class="hero-mid-value" id="next-bus">Checking routes…</div>
+                <div class="meta-row">Updated <span id="last-update">--:--</span></div>
+            </div>
+            <div class="hero-right">
+                <div class="badge">Sydney weather</div>
+                <div class="hero-right-temp" id="weather-temp">--°</div>
+                <div class="hero-right-desc" id="weather-desc">Loading…</div>
+            </div>
+        </header>
+
+        <section class="grid">
+            <article class="card tonight-card grid-span-2">
+                <div class="card-heading">
+                    <div>
+                        <p class="eyebrow">Tonight</p>
+                        <h2>Kitchen run-sheet</h2>
+                    </div>
+                    <button class="ghost-btn" onclick="openCookPicker()">Edit week</button>
                 </div>
-            </div>
-            <div class="header-center">
-                <div class="next-bus-main" id="next-bus">Loading next bus...</div>
-            </div>
-            <div class="header-right">
-                <div class="cookbook-icon" onclick="window.open('cook-book.html', '_blank')" title="Open Cook Book">📖</div>
-                <div class="weather">
-                    <div class="weather-temp" id="weather-temp">--°</div>
-                    <div class="weather-desc" id="weather-desc">Loading...</div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Tonight's Meal Panel -->
-        <div class="panel" style="grid-column: 1 / -1;">
-            <div class="panel-header" style="justify-content: flex-end;">
-                <button class="edit-btn" onclick="openCookPicker()">✏️ Edit Week</button>
-            </div>
-            <div class="panel-content">
-                <div class="tonight-meal">
-                    <div class="tonight-main">
-                        <div class="tonight-image">🐟</div>
-                        <div class="tonight-info">
-                            <div class="tonight-dish">Fish Friday</div>
-                            <div class="tonight-description">Pan-seared barramundi fillets with lemon butter sauce, served on a bed of seasonal greens and roasted chat potatoes. Finished with fresh herbs and a squeeze of lemon.</div>
-                            <div class="tonight-cook">Cooked by <span class="cook-badge jim">J</span> Jim</div>
-                        </div>
-                    </div>
-                    <div class="tonight-guests">
-                        <div class="guests-title">Joining for dinner:</div>
-                        <div class="guests-list" id="tonight-guests">
-                            <div class="guest-avatar jim" title="Jim">J</div>
-                            <div class="guest-avatar nic" title="Nicola">N</div>
-                            <div class="guest-avatar sophie" title="Sophie">S</div>
-                            <div class="guest-avatar lilly" title="Lilly">L</div>
-                        </div>
-                    </div>
-                    <div class="tonight-timing">
-                        <div class="time-block">
-                            <div class="time-label">Start Cooking</div>
-                            <div class="time-value" id="start-cooking">5:30 PM</div>
-                        </div>
-                        <div class="time-arrow">→</div>
-                        <div class="time-block">
-                            <div class="time-label">Eat</div>
-                            <div class="time-value" id="eat-time">7:00 PM</div>
-                        </div>
-                        <div class="time-remaining" id="cooking-status">Start in 45 mins</div>
-                    </div>
-                    <div class="tonight-actions">
-                        <button class="tonight-btn" onclick="window.open('cook-book.html', '_blank')">📖 View Recipe</button>
-                        <button class="tonight-btn" onclick="showPrepList()">✅ Prep List</button>
+                <div class="tonight-hero">
+                    <div class="tonight-emoji" id="tonight-emoji">🐟</div>
+                    <div>
+                        <h3 class="tonight-dish" id="tonight-dish">Fish Friday</h3>
+                        <p class="tonight-description" id="tonight-description">Pan-seared barramundi with lemon butter, greens, and roasted chats.</p>
+                        <p class="tonight-cook">Cooked by <span class="cook-chip chip-jim" id="tonight-cook-chip">J</span> <span id="tonight-cook-name">Jim</span></p>
                     </div>
                 </div>
-            </div>
-        </div>
-        
-        <!-- Next 3 Days Meals Panel -->
-        <div class="panel" style="grid-column: 1 / -1;">
-            <div class="panel-header">
-                <span class="panel-icon">📅</span>
-                <span class="panel-title">Next 3 Days</span>
-            </div>
-            <div class="panel-content">
-                <div class="meals-preview-grid" id="next-days-grid">
-                    <!-- Dynamically populated by JavaScript -->
+                <div>
+                    <p class="eyebrow" style="margin-top: 10px;">Guests</p>
+                    <div class="guest-strip" id="tonight-guests">
+                        <div class="guest-chip jim">J</div>
+                        <div class="guest-chip nic">N</div>
+                        <div class="guest-chip sophie">S</div>
+                        <div class="guest-chip lilly">L</div>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Cook Picker Modal -->
+                <div class="timeline">
+                    <div class="timeline-block">
+                        <p class="timeline-label">Start cooking</p>
+                        <p class="timeline-value" id="start-cooking">5:30 PM</p>
+                    </div>
+                    <div class="timeline-block">
+                        <p class="timeline-label">Dinner served</p>
+                        <p class="timeline-value" id="eat-time">7:00 PM</p>
+                    </div>
+                    <p class="timeline-status" id="cooking-status">Start in 45 min</p>
+                </div>
+                <div class="action-row">
+                    <button class="primary-btn" onclick="window.open('cook-book.html', '_blank')">📖 View recipe</button>
+                    <button class="secondary-btn" onclick="showPrepList()">✅ Prep list</button>
+                </div>
+            </article>
+
+            <article class="card quick-card">
+                <div class="card-heading">
+                    <div>
+                        <p class="eyebrow">Shortcuts</p>
+                        <h2>Quick actions</h2>
+                    </div>
+                </div>
+                <div class="quick-grid">
+                    <div class="quick-tile" onclick="window.open('https://marvin-commute.vercel.app/api/bus', '_blank')">
+                        <span class="quick-label">Bus API</span>
+                        <span class="quick-value">Live status</span>
+                    </div>
+                    <div class="quick-tile" onclick="window.open('cook-book.html', '_blank')">
+                        <span class="quick-label">Recipe bank</span>
+                        <span class="quick-value">Cook book</span>
+                    </div>
+                    <div class="quick-tile" onclick="toggleFullscreen()">
+                        <span class="quick-label">Display</span>
+                        <span class="quick-value">Fullscreen</span>
+                    </div>
+                    <div class="quick-tile" onclick="fetchWeather()">
+                        <span class="quick-label">Refresh</span>
+                        <span class="quick-value">Weather + bus</span>
+                    </div>
+                </div>
+            </article>
+
+            <article class="card next-days-card">
+                <div class="section-title">
+                    <div>
+                        <p class="eyebrow">Coming up</p>
+                        <h2>Next 3 nights</h2>
+                    </div>
+                </div>
+                <div class="preview-grid" id="next-days-grid"></div>
+            </article>
+
+            <article class="card week-card grid-span-2">
+                <div class="card-heading">
+                    <div>
+                        <p class="eyebrow">Roster</p>
+                        <h2>Who’s cooking?</h2>
+                    </div>
+                    <button class="ghost-btn" onclick="openCookPicker()">Assign cooks</button>
+                </div>
+                <div class="week-grid">
+                    <div class="day-card">
+                        <div class="day-label">Mon</div>
+                        <div class="day-cook"><div class="day-cook-avatar chip-jim">J</div></div>
+                        <div class="day-note">Claim a meal</div>
+                    </div>
+                    <div class="day-card">
+                        <div class="day-label">Tue</div>
+                        <div class="day-cook"><div class="day-cook-avatar chip-nic">N</div></div>
+                        <div class="day-note">Add dish</div>
+                    </div>
+                    <div class="day-card">
+                        <div class="day-label">Wed</div>
+                        <div class="day-cook"><div class="day-cook-avatar chip-sophie">S</div></div>
+                        <div class="day-note">Veg night</div>
+                    </div>
+                    <div class="day-card">
+                        <div class="day-label">Thu</div>
+                        <div class="day-cook"><div class="day-cook-avatar chip-lilly">L</div></div>
+                        <div class="day-note">Open slot</div>
+                    </div>
+                    <div class="day-card today">
+                        <div class="day-label">Fri</div>
+                        <div class="day-cook"><div class="day-cook-avatar chip-jim">J</div></div>
+                        <div class="day-note">Fish Friday</div>
+                    </div>
+                    <div class="day-card">
+                        <div class="day-label">Sat</div>
+                        <div class="day-cook"><div class="day-cook-avatar chip-sophie">S</div></div>
+                        <div class="day-note">BBQ Night</div>
+                    </div>
+                    <div class="day-card">
+                        <div class="day-label">Sun</div>
+                        <div class="day-cook"><div class="day-cook-avatar chip-nic">N</div></div>
+                        <div class="day-note">Roast dinner</div>
+                    </div>
+                </div>
+            </article>
+        </section>
+    </main>
+
     <div class="modal-overlay" id="cookModal">
         <div class="modal">
             <div class="modal-header">
-                <span class="modal-title">Who's Cooking This Week?</span>
+                <h3 class="modal-title">Who’s cooking this week?</h3>
                 <button class="modal-close" onclick="closeCookPicker()">✕</button>
             </div>
             <div class="picker-grid">
                 <div class="picker-day">
                     <div class="picker-day-name">Mon</div>
                     <div class="cook-options">
-                        <div class="cook-option" onclick="selectCook(this, 'mon', 'Jim')">
-                            <div class="cook-avatar jim">J</div>
-                        </div>
-                        <div class="cook-option" onclick="selectCook(this, 'mon', 'Nicola')">
-                            <div class="cook-avatar nic">N</div>
-                        </div>
-                        <div class="cook-option" onclick="selectCook(this, 'mon', 'Sophie')">
-                            <div class="cook-avatar sophie">S</div>
-                        </div>
-                        <div class="cook-option" onclick="selectCook(this, 'mon', 'Lilly')">
-                            <div class="cook-avatar lilly">L</div>
-                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'mon', 'Jim')"><div class="cook-avatar chip-jim">J</div></div>
+                        <div class="cook-option" onclick="selectCook(this, 'mon', 'Nicola')"><div class="cook-avatar chip-nic">N</div></div>
+                        <div class="cook-option" onclick="selectCook(this, 'mon', 'Sophie')"><div class="cook-avatar chip-sophie">S</div></div>
+                        <div class="cook-option" onclick="selectCook(this, 'mon', 'Lilly')"><div class="cook-avatar chip-lilly">L</div></div>
                     </div>
                 </div>
                 <div class="picker-day">
                     <div class="picker-day-name">Tue</div>
                     <div class="cook-options">
-                        <div class="cook-option" onclick="selectCook(this, 'tue', 'Jim')">
-                            <div class="cook-avatar jim">J</div>
-                        </div>
-                        <div class="cook-option" onclick="selectCook(this, 'tue', 'Nicola')">
-                            <div class="cook-avatar nic">N</div>
-                        </div>
-                        <div class="cook-option" onclick="selectCook(this, 'tue', 'Sophie')">
-                            <div class="cook-avatar sophie">S</div>
-                        </div>
-                        <div class="cook-option" onclick="selectCook(this, 'tue', 'Lilly')">
-                            <div class="cook-avatar lilly">L</div>
-                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'tue', 'Jim')"><div class="cook-avatar chip-jim">J</div></div>
+                        <div class="cook-option" onclick="selectCook(this, 'tue', 'Nicola')"><div class="cook-avatar chip-nic">N</div></div>
+                        <div class="cook-option" onclick="selectCook(this, 'tue', 'Sophie')"><div class="cook-avatar chip-sophie">S</div></div>
+                        <div class="cook-option" onclick="selectCook(this, 'tue', 'Lilly')"><div class="cook-avatar chip-lilly">L</div></div>
                     </div>
                 </div>
                 <div class="picker-day">
                     <div class="picker-day-name">Wed</div>
                     <div class="cook-options">
-                        <div class="cook-option" onclick="selectCook(this, 'wed', 'Jim')">
-                            <div class="cook-avatar jim">J</div>
-                        </div>
-                        <div class="cook-option" onclick="selectCook(this, 'wed', 'Nicola')">
-                            <div class="cook-avatar nic">N</div>
-                        </div>
-                        <div class="cook-option" onclick="selectCook(this, 'wed', 'Sophie')">
-                            <div class="cook-avatar sophie">S</div>
-                        </div>
-                        <div class="cook-option" onclick="selectCook(this, 'wed', 'Lilly')">
-                            <div class="cook-avatar lilly">L</div>
-                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'wed', 'Jim')"><div class="cook-avatar chip-jim">J</div></div>
+                        <div class="cook-option" onclick="selectCook(this, 'wed', 'Nicola')"><div class="cook-avatar chip-nic">N</div></div>
+                        <div class="cook-option" onclick="selectCook(this, 'wed', 'Sophie')"><div class="cook-avatar chip-sophie">S</div></div>
+                        <div class="cook-option" onclick="selectCook(this, 'wed', 'Lilly')"><div class="cook-avatar chip-lilly">L</div></div>
                     </div>
                 </div>
                 <div class="picker-day">
                     <div class="picker-day-name">Thu</div>
                     <div class="cook-options">
-                        <div class="cook-option" onclick="selectCook(this, 'thu', 'Jim')">
-                            <div class="cook-avatar jim">J</div>
-                        </div>
-                        <div class="cook-option" onclick="selectCook(this, 'thu', 'Nicola')">
-                            <div class="cook-avatar nic">N</div>
-                        </div>
-                        <div class="cook-option" onclick="selectCook(this, 'thu', 'Sophie')">
-                            <div class="cook-avatar sophie">S</div>
-                        </div>
-                        <div class="cook-option" onclick="selectCook(this, 'thu', 'Lilly')">
-                            <div class="cook-avatar lilly">L</div>
-                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'thu', 'Jim')"><div class="cook-avatar chip-jim">J</div></div>
+                        <div class="cook-option" onclick="selectCook(this, 'thu', 'Nicola')"><div class="cook-avatar chip-nic">N</div></div>
+                        <div class="cook-option" onclick="selectCook(this, 'thu', 'Sophie')"><div class="cook-avatar chip-sophie">S</div></div>
+                        <div class="cook-option" onclick="selectCook(this, 'thu', 'Lilly')"><div class="cook-avatar chip-lilly">L</div></div>
                     </div>
                 </div>
                 <div class="picker-day">
                     <div class="picker-day-name">Fri</div>
                     <div class="cook-options">
-                        <div class="cook-option" onclick="selectCook(this, 'fri', 'Jim')">
-                            <div class="cook-avatar jim">J</div>
-                        </div>
-                        <div class="cook-option" onclick="selectCook(this, 'fri', 'Nicola')">
-                            <div class="cook-avatar nic">N</div>
-                        </div>
-                        <div class="cook-option" onclick="selectCook(this, 'fri', 'Sophie')">
-                            <div class="cook-avatar sophie">S</div>
-                        </div>
-                        <div class="cook-option" onclick="selectCook(this, 'fri', 'Lilly')">
-                            <div class="cook-avatar lilly">L</div>
-                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'fri', 'Jim')"><div class="cook-avatar chip-jim">J</div></div>
+                        <div class="cook-option" onclick="selectCook(this, 'fri', 'Nicola')"><div class="cook-avatar chip-nic">N</div></div>
+                        <div class="cook-option" onclick="selectCook(this, 'fri', 'Sophie')"><div class="cook-avatar chip-sophie">S</div></div>
+                        <div class="cook-option" onclick="selectCook(this, 'fri', 'Lilly')"><div class="cook-avatar chip-lilly">L</div></div>
                     </div>
                 </div>
                 <div class="picker-day">
                     <div class="picker-day-name">Sat</div>
                     <div class="cook-options">
-                        <div class="cook-option" onclick="selectCook(this, 'sat', 'Jim')">
-                            <div class="cook-avatar jim">J</div>
-                        </div>
-                        <div class="cook-option" onclick="selectCook(this, 'sat', 'Nicola')">
-                            <div class="cook-avatar nic">N</div>
-                        </div>
-                        <div class="cook-option" onclick="selectCook(this, 'sat', 'Sophie')">
-                            <div class="cook-avatar sophie">S</div>
-                        </div>
-                        <div class="cook-option" onclick="selectCook(this, 'sat', 'Lilly')">
-                            <div class="cook-avatar lilly">L</div>
-                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'sat', 'Jim')"><div class="cook-avatar chip-jim">J</div></div>
+                        <div class="cook-option" onclick="selectCook(this, 'sat', 'Nicola')"><div class="cook-avatar chip-nic">N</div></div>
+                        <div class="cook-option" onclick="selectCook(this, 'sat', 'Sophie')"><div class="cook-avatar chip-sophie">S</div></div>
+                        <div class="cook-option" onclick="selectCook(this, 'sat', 'Lilly')"><div class="cook-avatar chip-lilly">L</div></div>
                     </div>
                 </div>
                 <div class="picker-day">
                     <div class="picker-day-name">Sun</div>
                     <div class="cook-options">
-                        <div class="cook-option" onclick="selectCook(this, 'sun', 'Jim')">
-                            <div class="cook-avatar jim">J</div>
-                        </div>
-                        <div class="cook-option" onclick="selectCook(this, 'sun', 'Nicola')">
-                            <div class="cook-avatar nic">N</div>
-                        </div>
-                        <div class="cook-option" onclick="selectCook(this, 'sun', 'Sophie')">
-                            <div class="cook-avatar sophie">S</div>
-                        </div>
-                        <div class="cook-option" onclick="selectCook(this, 'sun', 'Lilly')">
-                            <div class="cook-avatar lilly">L</div>
-                        </div>
+                        <div class="cook-option" onclick="selectCook(this, 'sun', 'Jim')"><div class="cook-avatar chip-jim">J</div></div>
+                        <div class="cook-option" onclick="selectCook(this, 'sun', 'Nicola')"><div class="cook-avatar chip-nic">N</div></div>
+                        <div class="cook-option" onclick="selectCook(this, 'sun', 'Sophie')"><div class="cook-avatar chip-sophie">S</div></div>
+                        <div class="cook-option" onclick="selectCook(this, 'sun', 'Lilly')"><div class="cook-avatar chip-lilly">L</div></div>
                     </div>
                 </div>
             </div>
             <div class="modal-actions">
                 <button class="modal-btn cancel" onclick="closeCookPicker()">Cancel</button>
-                <button class="modal-btn save" onclick="saveCooks()">Save Changes</button>
+                <button class="modal-btn save" onclick="saveCooks()">Save</button>
             </div>
         </div>
     </div>
-    
+
     <script>
         // Clock
         function updateClock() {
             const now = new Date();
-            document.getElementById('clock').textContent = now.toLocaleTimeString('en-AU', { 
-                hour: '2-digit', 
+            document.getElementById('clock').textContent = now.toLocaleTimeString('en-AU', {
+                hour: '2-digit',
                 minute: '2-digit',
-                hour12: false 
+                hour12: false
             });
-            document.getElementById('date').textContent = now.toLocaleDateString('en-AU', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
+            document.getElementById('date').textContent = now.toLocaleDateString('en-AU', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
             });
         }
         setInterval(updateClock, 1000);
         updateClock();
-        
-        // Weather (using a simple API)
+
+        // Weather (using Open-Meteo)
         async function fetchWeather() {
             try {
-                // Using Open-Meteo for Sydney weather
                 const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-33.87&longitude=151.21&current_weather=true');
                 const data = await response.json();
                 document.getElementById('weather-temp').textContent = Math.round(data.current_weather.temperature) + '°';
@@ -1026,7 +832,7 @@
                 document.getElementById('weather-desc').textContent = 'Unavailable';
             }
         }
-        
+
         function getWeatherDesc(code) {
             const codes = {
                 0: 'Clear sky', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
@@ -1036,19 +842,18 @@
             return codes[code] || 'Unknown';
         }
         fetchWeather();
-        setInterval(fetchWeather, 600000); // Update every 10 minutes
-        
-        // Next Bus in Header
+        setInterval(fetchWeather, 600000);
+
         const allowedRoutes = ['270', '270X', '271', '274'];
-        
+
         async function fetchNextBus() {
             try {
                 const response = await fetch('https://marvin-commute.vercel.app/api/bus?stop=208560');
                 const data = await response.json();
                 const now = new Date();
-                
+
                 if (!data.stopEvents) return;
-                
+
                 const nextBus = data.stopEvents
                     .filter(event => {
                         const lineNo = event.transportation?.number || '';
@@ -1057,82 +862,76 @@
                         return allowedRoutes.includes(lineNo) && secondsSinceDeparture < 15;
                     })
                     .sort((a, b) => new Date(a.departureTimeEstimated || a.departureTimePlanned) - new Date(b.departureTimeEstimated || b.departureTimePlanned))[0];
-                
+
+                const busEl = document.getElementById('next-bus');
                 if (nextBus) {
                     const lineNo = nextBus.transportation?.number || '?';
                     const departureTime = nextBus.departureTimeEstimated || nextBus.departureTimePlanned;
                     const minsUntil = Math.floor((new Date(departureTime) - now) / 60000);
-                    
-                    const busEl = document.getElementById('next-bus');
+
                     if (minsUntil < 0) {
                         busEl.textContent = `${lineNo} departed`;
-                        busEl.className = 'next-bus-main';
+                        busEl.className = 'hero-mid-value';
                     } else if (minsUntil === 0) {
-                        busEl.textContent = `${lineNo} departing now!`;
-                        busEl.className = 'next-bus-main soon';
+                        busEl.textContent = `${lineNo} boarding now`;
+                        busEl.className = 'hero-mid-value soon';
                     } else if (minsUntil === 1) {
                         busEl.textContent = `${lineNo} in 1 min`;
-                        busEl.className = 'next-bus-main soon';
+                        busEl.className = 'hero-mid-value soon';
                     } else if (minsUntil < 60) {
                         busEl.textContent = `${lineNo} in ${minsUntil} mins`;
-                        busEl.className = minsUntil < 10 ? 'next-bus-main soon' : 'next-bus-main';
+                        busEl.className = minsUntil < 10 ? 'hero-mid-value soon' : 'hero-mid-value';
                     } else {
                         busEl.textContent = `${lineNo} at ${new Date(departureTime).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit', hour12: false })}`;
-                        busEl.className = 'next-bus-main';
+                        busEl.className = 'hero-mid-value';
                     }
                 } else {
-                    document.getElementById('next-bus').textContent = 'No buses found';
+                    busEl.textContent = 'No buses found';
+                    busEl.className = 'hero-mid-value';
                 }
             } catch (error) {
                 document.getElementById('next-bus').textContent = 'Bus info unavailable';
             }
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString('en-AU');
         }
-        
+
         fetchNextBus();
-        setInterval(fetchNextBus, 30000); // Update every 30 seconds
-        
-        // Update timestamp
-        document.getElementById('last-update').textContent = new Date().toLocaleTimeString('en-AU');
-        
-        // Populate Next 3 Days
+        setInterval(fetchNextBus, 30000);
+
         function populateNextDays() {
             const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
             const meals = [
-                { day: 'Sat', cook: 'S', cookName: 'Sophie', meal: '🥩 BBQ', avatarClass: 'sophie' },
-                { day: 'Sun', cook: 'N', cookName: 'Nicola', meal: '🍗 Roast Dinner', avatarClass: 'nic' },
-                { day: 'Mon', cook: 'J', cookName: 'Jim', meal: '🍝 Pasta Night', avatarClass: 'jim' },
-                { day: 'Tue', cook: 'L', cookName: 'Lilly', meal: '🍛 Curry Night', avatarClass: 'lilly' },
-                { day: 'Wed', cook: 'S', cookName: 'Sophie', meal: '🍕 Pizza Night', avatarClass: 'sophie' },
-                { day: 'Thu', cook: 'N', cookName: 'Nicola', meal: '🥗 Salad & Grill', avatarClass: 'nic' },
-                { day: 'Fri', cook: 'J', cookName: 'Jim', meal: '🐟 Fish Friday', avatarClass: 'jim' }
+                { day: 'Sat', cook: 'S', meal: '🥩 BBQ Night', avatarClass: 'chip-sophie' },
+                { day: 'Sun', cook: 'N', meal: '🍗 Roast Dinner', avatarClass: 'chip-nic' },
+                { day: 'Mon', cook: 'J', meal: '🍝 Pasta Night', avatarClass: 'chip-jim' },
+                { day: 'Tue', cook: 'L', meal: '🍛 Curry Night', avatarClass: 'chip-lilly' },
+                { day: 'Wed', cook: 'S', meal: '🍕 Pizza Night', avatarClass: 'chip-sophie' },
+                { day: 'Thu', cook: 'N', meal: '🥗 Salad & Grill', avatarClass: 'chip-nic' },
+                { day: 'Fri', cook: 'J', meal: '🐟 Fish Friday', avatarClass: 'chip-jim' }
             ];
-            
+
             const today = new Date().getDay();
             const grid = document.getElementById('next-days-grid');
-            
             let html = '';
+
             for (let i = 1; i <= 3; i++) {
                 const nextDayIndex = (today + i) % 7;
                 const dayName = days[nextDayIndex];
                 const meal = meals.find(m => m.day === dayName) || meals[0];
-                
                 const dayLabel = i === 1 ? 'Tomorrow' : dayName;
-                
+
                 html += `
-                    <div class="meal-preview-card">
-                        <div class="meal-day">${dayLabel}</div>
-                        <div class="meal-cook-avatar ${meal.avatarClass}">${meal.cook}</div>
-                        <div class="meal-name">${meal.meal}</div>
+                    <div class="preview-card">
+                        <div class="preview-day">${dayLabel}</div>
+                        <div class="preview-avatar ${meal.avatarClass}">${meal.cook}</div>
+                        <div class="preview-label">${meal.meal}</div>
                     </div>
                 `;
             }
-            
             grid.innerHTML = html;
         }
-        
         populateNextDays();
-        
-        // Fullscreen toggle
+
         function toggleFullscreen() {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen();
@@ -1140,37 +939,47 @@
                 document.exitFullscreen();
             }
         }
-        
-        // Prevent sleep (keep screen on)
+
         if ('wakeLock' in navigator) {
-            navigator.wakeLock.request('screen').catch(err => {
-                console.log('Wake lock not granted:', err);
-            });
+            navigator.wakeLock.request('screen').catch(err => console.log('Wake lock not granted:', err));
         }
-        
-        // Cook Picker Functions
+
+        // Cook picker logic
         let selectedCooks = {};
-        let notEating = {}; // Track who's not eating each day
+        let notEating = {};
         let longPressTimer;
-        
+
+        const cookChipMap = {
+            Jim: 'chip-jim',
+            Nicola: 'chip-nic',
+            Sophie: 'chip-sophie',
+            Lilly: 'chip-lilly'
+        };
+
+        function cookAvatarHtml(cook) {
+            const cls = cookChipMap[cook] || 'chip-family';
+            return `<div class="day-cook-avatar ${cls}">${cook.charAt(0)}</div>`;
+        }
+
         function openCookPicker() {
             document.getElementById('cookModal').classList.add('active');
-            // Pre-select current cooks based on displayed schedule
-            const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
-            days.forEach(day => {
-                const dayCard = document.querySelector(`.day-card:nth-child(${days.indexOf(day) + 1})`);
-                if (dayCard) {
-                    const cookName = dayCard.querySelector('.day-cook').textContent;
-                    selectedCooks[day] = cookName;
+            const cookOptions = document.querySelectorAll('.cook-option');
+            cookOptions.forEach(option => {
+                option.classList.remove('selected');
+                const onclick = option.getAttribute('onclick');
+                const match = onclick.match(/selectCook\(this, '([^']+)', '([^']+)'\)/);
+                if (match) {
+                    const [_, day, cook] = match;
+                    if (selectedCooks[day] === cook) {
+                        option.classList.add('selected');
+                    }
                 }
             });
-            
-            // Apply not-eating state to visual elements
             applyNotEatingVisuals();
         }
-        
+
         function applyNotEatingVisuals() {
-            Object.entries(notEating).forEach(([dayKey, people]) => {
+            Object.entries(notEating).forEach(([dayKey]) => {
                 const [day, person] = dayKey.split('-');
                 const dayColumn = document.querySelector(`.picker-day:nth-child(${getDayIndex(day) + 1})`);
                 if (dayColumn) {
@@ -1184,98 +993,74 @@
                 }
             });
         }
-        
+
         function getDayIndex(day) {
             const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
             return days.indexOf(day);
         }
-        
+
         function closeCookPicker() {
             document.getElementById('cookModal').classList.remove('active');
         }
-        
+
         function selectCook(element, day, cook) {
-            // Check if this person is marked as not eating
             const notEatingKey = `${day}-${cook}`;
             if (notEating[notEatingKey]) {
-                // Remove not-eating status
                 delete notEating[notEatingKey];
                 element.classList.remove('not-eating');
             }
-            
-            // Remove selected class from all options for this day
             const dayOptions = element.parentElement.querySelectorAll('.cook-option');
             dayOptions.forEach(opt => opt.classList.remove('selected'));
-            
-            // Add selected class to clicked option
             element.classList.add('selected');
-            
-            // Store selection
             selectedCooks[day] = cook;
         }
-        
+
         function handleLongPress(element, day, cook) {
             const notEatingKey = `${day}-${cook}`;
-            
             if (notEating[notEatingKey]) {
-                // Remove not-eating status
                 delete notEating[notEatingKey];
                 element.classList.remove('not-eating');
-                // Also select them as cook
                 selectCook(element, day, cook);
             } else {
-                // Mark as not eating
                 notEating[notEatingKey] = true;
                 element.classList.add('not-eating');
                 element.classList.remove('selected');
-                
-                // If they were the selected cook, clear that
                 if (selectedCooks[day] === cook) {
                     delete selectedCooks[day];
                 }
             }
         }
-        
+
         function saveCooks() {
-            // Update the displayed schedule
             const dayMap = { 'mon': 0, 'tue': 1, 'wed': 2, 'thu': 3, 'fri': 4, 'sat': 5, 'sun': 6 };
-            
             Object.entries(selectedCooks).forEach(([day, cook]) => {
                 const dayCards = document.querySelectorAll('.day-card');
                 const dayIndex = dayMap[day];
                 if (dayCards[dayIndex]) {
                     const cookEl = dayCards[dayIndex].querySelector('.day-cook');
-                    cookEl.innerHTML = `<div class="day-cook-avatar ${cook.toLowerCase()}">${cook.charAt(0)}</div>`;
+                    cookEl.innerHTML = `<div class="day-cook-avatar chip-${cook.toLowerCase()}">${cook.charAt(0)}</div>`;
                 }
             });
-            
             closeCookPicker();
-            
-            // Save to localStorage for persistence
             localStorage.setItem('familyHubCooks', JSON.stringify(selectedCooks));
             localStorage.setItem('familyHubNotEating', JSON.stringify(notEating));
-            
-            // Trigger meal selection jobs for family members
             triggerMealSelectionJobs();
         }
-        
+
         function triggerMealSelectionJobs() {
-            // This will be replaced with actual API call to trigger notifications
             const assignments = Object.entries(selectedCooks).map(([day, cook]) => {
-                return { day, cook, notEating: Object.keys(notEating)
-                    .filter(k => k.startsWith(day + '-'))
-                    .map(k => k.split('-')[1]) };
+                return {
+                    day,
+                    cook,
+                    notEating: Object.keys(notEating)
+                        .filter(k => k.startsWith(day + '-'))
+                        .map(k => k.split('-')[1])
+                };
             });
-            
             console.log('Triggering meal selection jobs:', assignments);
-            
-            // TODO: POST to /api/trigger-meal-jobs with assignments
-            // This will notify each family member's iPhone app
-            
-            // Show confirmation
             showNotification('Meal assignments saved! Family notified 📱');
         }
-        
+
         function showNotification(message) {
             const notif = document.createElement('div');
             notif.style.cssText = `
@@ -1283,53 +1068,48 @@
                 top: 20px;
                 left: 50%;
                 transform: translateX(-50%);
-                background: rgba(0,255,136,0.9);
-                color: #000;
-                padding: 15px 30px;
-                border-radius: 10px;
-                font-size: 18px;
+                background: rgba(82, 255, 168, 0.95);
+                color: #04101f;
+                padding: 14px 28px;
+                border-radius: 999px;
+                font-size: 16px;
                 font-weight: 600;
-                z-index: 2000;
-                animation: slideDown 0.3s ease;
+                z-index: 1200;
+                box-shadow: 0 15px 45px rgba(82, 255, 168, 0.35);
             `;
             notif.textContent = message;
             document.body.appendChild(notif);
-            
             setTimeout(() => {
-                notif.style.animation = 'slideUp 0.3s ease';
+                notif.style.opacity = '0';
+                notif.style.transform = 'translate(-50%, -10px)';
                 setTimeout(() => notif.remove(), 300);
-            }, 3000);
+            }, 2600);
         }
-        
-        // Load saved cooks on startup
+
         function loadSavedCooks() {
             const saved = localStorage.getItem('familyHubCooks');
             const savedNotEating = localStorage.getItem('familyHubNotEating');
-            
+
             if (saved) {
                 selectedCooks = JSON.parse(saved);
                 const dayMap = { 'mon': 0, 'tue': 1, 'wed': 2, 'thu': 3, 'fri': 4, 'sat': 5, 'sun': 6 };
-                
                 Object.entries(selectedCooks).forEach(([day, cook]) => {
                     const dayCards = document.querySelectorAll('.day-card');
                     const dayIndex = dayMap[day];
                     if (dayCards[dayIndex]) {
                         const cookEl = dayCards[dayIndex].querySelector('.day-cook');
-                        cookEl.innerHTML = `<div class="day-cook-avatar ${cook.toLowerCase()}">${cook.charAt(0)}</div>`;
+                        cookEl.innerHTML = cookAvatarHtml(cook);
                     }
                 });
             }
-            
+
             if (savedNotEating) {
                 notEating = JSON.parse(savedNotEating);
             }
         }
-        
-        // Add long-press event listeners after page loads
+
         document.addEventListener('DOMContentLoaded', function() {
             loadSavedCooks();
-            
-            // Add touch/mouse events for long press
             const cookOptions = document.querySelectorAll('.cook-option');
             cookOptions.forEach(option => {
                 const onclick = option.getAttribute('onclick');
@@ -1337,19 +1117,17 @@
                 if (match) {
                     const day = match[1];
                     const cook = match[2];
-                    
+
                     const startLongPress = (e) => {
                         e.preventDefault();
                         longPressTimer = setTimeout(() => {
                             handleLongPress(option, day, cook);
-                        }, 800); // 800ms for long press
+                        }, 800);
                     };
-                    
-                    const cancelLongPress = () => {
-                        clearTimeout(longPressTimer);
-                    };
-                    
-                    option.addEventListener('touchstart', startLongPress, {passive: false});
+
+                    const cancelLongPress = () => clearTimeout(longPressTimer);
+
+                    option.addEventListener('touchstart', startLongPress, { passive: false });
                     option.addEventListener('touchend', cancelLongPress);
                     option.addEventListener('touchmove', cancelLongPress);
                     option.addEventListener('mousedown', startLongPress);
@@ -1358,6 +1136,10 @@
                 }
             });
         });
+
+        function showPrepList() {
+            alert('Prep list coming soon.');
+        }
     </script>
 </body>
 </html>
