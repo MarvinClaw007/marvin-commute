@@ -602,14 +602,16 @@
             </div>
             <div class="hero-right">
                 <div class="badge">Sydney weather</div>
-                <div class="hero-right-temp" id="weather-temp">--°</div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div class="hero-right-temp" id="weather-temp">--°</div>
+                    <div class="cookbook-link" onclick="window.open('cook-book.html', '_blank')" title="Open Cook Book">📖</div>
+                </div>
                 <div class="hero-right-desc" id="weather-desc">Loading…</div>
-                <div class="cookbook-link" onclick="window.open('cook-book.html', '_blank')" title="Open Cook Book">📖</div>
             </div>
         </header>
 
         <section class="grid">
-            <article class="card tonight-card grid-span-2">
+            <article class="card tonight-card">
                 <div class="card-heading">
                     <div>
                         <p class="eyebrow">Tonight</p>
@@ -651,14 +653,13 @@
                 </div>
             </article>
 
-            <article class="card next-days-card" style="grid-column: 1 / -1;">
-                <div class="section-title">
-                    <div>
-                        <p class="eyebrow">Coming up</p>
-                        <h2>Next 3 nights</h2>
-                    </div>
+            <article class="card next-days-card" style="display: flex; flex-direction: row; gap: 20px; padding: 0; overflow: hidden;">
+                <div style="background: rgba(0,0,0,0.2); padding: 24px 16px; display: flex; align-items: center; justify-content: center; writing-mode: vertical-rl; text-orientation: mixed;">
+                    <h2 style="font-size: 18px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent);">Next 3 Nights</h2>
                 </div>
-                <div class="preview-grid" id="next-days-grid"></div>
+                <div style="flex: 1; padding: 24px;">
+                    <div class="preview-grid" id="next-days-grid"></div>
+                </div>
             </article>
 
             <article class="card week-card grid-span-2">
