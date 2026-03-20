@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commute - Bus Times</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: rgba(0,0,0,0.3);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .title {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .current-time {
+            font-size: 32px;
+            font-weight: 300;
+            font-variant-numeric: tabular-nums;
+            color: #00d4ff;
+        }
+        
+        .tabs {
+            display: flex;
+            background: rgba(0,0,0,0.2);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            text-decoration: none;
+            color: #fff;
+            background: rgba(0,212,255,0.2);
+            border-bottom: 3px solid #00d4ff;
+        }
+        
+        .tab:hover {
+            background: rgba(0,212,255,0.3);
+        }
+        
+        .content {
+            padding: 30px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .stop-header {
+            font-size: 20px;
+            color: #888;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .bus-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.2s ease;
+        }
+        
+        .bus-card:hover {
+            transform: translateX(5px);
+            background: rgba(255,255,255,0.08);
+        }
+        
+        .bus-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .bus-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #00d4ff;
+        }
+        
+        .bus-destination {
+            font-size: 16px;
+            color: #ccc;
+        }
+        
+        .countdown {
+            font-size: 36px;
+            font-weight: 300;
+            color: #00ff88;
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .countdown.soon {
+            color: #ffaa00;
+        }
+        
+        .countdown.departed {
+            color: #ff4444;
+        }
+        
+        .arrival-info {
+            font-size: 14px;
+            color: #888;
+            margin-top: 8px;
+        }
+        
+        .realtime-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .refresh-info {
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            margin-top: 30px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #ff4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title">🚌 Commute</div>
+        <div class="current-time" id="clock">--:--</div>
+    </div>
+    
+    <div class="tabs">
+        <a href="/commute.html" class="tab active">→ To City</a>
+    </div>
+    
+    <div class="content">
+        <div class="stop-header">📍 Glen St opp Frenchs Forest Showground, Belrose</div>
+        
+        <div id="bus-list">
+            <div class="loading">Loading bus data...</div>
+        </div>
+        
+        <div class="refresh-info">
+            <span class="realtime-indicator"></span>Real-time data • Auto-refreshes every 30 seconds
+        </div>
+    </div>
+    
+    <script>
+        // API URL - Vercel serverless function
+        const API_URL = '/api/bus?stop=208560';
+        let busData = [];
+        
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-AU', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+            });
+            document.getElementById('clock').textContent = timeString;
+        }
+        
+        function formatTime(isoTime) {
+            if (!isoTime) return '--:--';
+            const date = new Date(isoTime);
+            return date.toLocaleTimeString('en-AU', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+            });
+        }
+        
+        function getMinutesUntil(isoTime) {
+            if (!isoTime) return null;
+            const departure = new Date(isoTime);
+            const now = new Date();
+            return Math.floor((departure - now) / 60000);
+        }
+        
+        function getCountdownClass(mins) {
+            if (mins < 0) return 'departed';
+            if (mins < 5) return 'soon';
+            return '';
+        }
+        
+        function formatCountdown(mins) {
+            if (mins < 0) return 'Departed';
+            if (mins === 0) return 'Now';
+            return `${mins} min`;
+        }
+        
+        function renderBuses(data) {
+            const container = document.getElementById('bus-list');
+            const now = new Date();
+            
+            if (!data.stopEvents || data.stopEvents.length === 0) {
+                container.innerHTML = '<div class="error">No bus data available</div>';
+                return;
+            }
+            
+            // Filter and sort buses to city
+            // Exclude buses that departed more than 15 seconds ago
+            const cityBuses = data.stopEvents
+                .filter(event => {
+                    const dest = event.transportation?.destination?.name || '';
+                    const isCityDest = dest.toLowerCase().includes('qvb') || 
+                           dest.toLowerCase().includes('city') ||
+                           dest.toLowerCase().includes('chatswood') ||
+                           dest.toLowerCase().includes('manly');
+                    
+                    // Check if bus departed more than 15 seconds ago
+                    const departureTime = new Date(event.departureTimeEstimated || event.departureTimePlanned);
+                    const secondsSinceDeparture = (now - departureTime) / 1000;
+                    const isRecent = secondsSinceDeparture < 15;
+                    
+                    return isCityDest && isRecent;
+                })
+                .sort((a, b) => {
+                    const timeA = new Date(a.departureTimeEstimated || a.departureTimePlanned);
+                    const timeB = new Date(b.departureTimeEstimated || b.departureTimePlanned);
+                    return timeA - timeB;
+                })
+                .slice(0, 5);
+            
+            if (cityBuses.length === 0) {
+                container.innerHTML = '<div class="error">No buses to city found</div>';
+                return;
+            }
+            
+            container.innerHTML = cityBuses.map((event, index) => {
+                const transport = event.transportation || {};
+                const lineNo = transport.number || '?';
+                const destination = transport.destination?.name || 'Unknown';
+                const departureTime = event.departureTimeEstimated || event.departureTimePlanned;
+                const isRealtime = event.isRealtimeControlled;
+                const minsUntil = getMinutesUntil(departureTime);
+                const countdownClass = getCountdownClass(minsUntil);
+                const countdownText = formatCountdown(minsUntil);
+                
+                // Only show buses that actually go to the city (QVB, Wynyard, Town Hall)
+                const destLower = destination.toLowerCase();
+                const isCityBus = destLower.includes('qvb') || 
+                                  destLower.includes('wynyard') || 
+                                  destLower.includes('town hall') ||
+                                  destLower.includes('city');
+                
+                if (!isCityBus) return null; // Skip non-city buses
+                
+                return {
+                    html: `
+                    <div class="bus-card" data-departure="${departureTime}">
+                        <div class="bus-header">
+                            <div>
+                                <div class="bus-number">${lineNo}</div>
+                                <div class="bus-destination">${isRealtime ? '<span class="realtime-indicator"></span>' : ''}${destination}</div>
+                            </div>
+                            <div class="countdown ${countdownClass}" id="bus-${index}">${countdownText}</div>
+                        </div>
+                        <div class="arrival-info">
+                            <span style="color: #00d4ff;">🚌 Departs:</span> ${formatTime(departureTime)}
+                            <span style="color: #888; margin-left: 15px;">→ Arrives City: ~${formatTime(new Date(new Date(departureTime).getTime() + 35*60000).toISOString())}</span>
+                        </div>
+                    </div>
+                    `,
+                    departure: departureTime,
+                    index: index
+                };
+            }).filter(item => item !== null).map(item => item.html).join('');
+            
+            busData = cityBuses.map((event, index) => ({
+                id: `bus-${index}`,
+                departure: event.departureTimeEstimated || event.departureTimePlanned
+            }));
+        }
+        
+        function updateCountdowns() {
+            busData.forEach(bus => {
+                const el = document.getElementById(bus.id);
+                if (!el) return;
+                
+                const minsUntil = getMinutesUntil(bus.departure);
+                el.className = 'countdown ' + getCountdownClass(minsUntil);
+                el.textContent = formatCountdown(minsUntil);
+            });
+        }
+        
+        async function fetchBusData() {
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error('Failed to fetch');
+                const data = await response.json();
+                renderBuses(data);
+            } catch (error) {
+                console.error('Error fetching bus data:', error);
+                document.getElementById('bus-list').innerHTML = 
+                    '<div class="error">Failed to load bus data. Retrying...</div>';
+            }
+        }
+        
+        // Initialize
+        updateClock();
+        setInterval(updateClock, 1000);
+        
+        fetchBusData();
+        setInterval(fetchBusData, 30000);
+        
+        setInterval(updateCountdowns, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "name": "marvin-commute",
+  "version": "1.0.0",
+  "description": "Bus commute tracker for Marvin and Jim",
+  "scripts": {
+    "start": "vercel dev"
+  }
+}
