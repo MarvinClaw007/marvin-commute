@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Family Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+        
+        .hub-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            height: 100vh;
+            max-width: 1366px;
+            margin: 0 auto;
+        }
+        
+        /* Header */
+        .header {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .clock {
+            font-size: 72px;
+            font-weight: 300;
+            font-variant-numeric: tabular-nums;
+            color: #00d4ff;
+            line-height: 1;
+        }
+        
+        .date {
+            font-size: 24px;
+            color: #888;
+        }
+        
+        .weather {
+            text-align: right;
+        }
+        
+        .weather-temp {
+            font-size: 48px;
+            font-weight: 300;
+            color: #00d4ff;
+        }
+        
+        .weather-desc {
+            font-size: 18px;
+            color: #888;
+        }
+        
+        /* Panels */
+        .panel {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255,255,255,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .panel-icon {
+            font-size: 32px;
+        }
+        
+        .panel-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #00d4ff;
+        }
+        
+        .panel-content {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        /* Bus Panel */
+        .bus-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .bus-tab {
+            flex: 1;
+            padding: 12px 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .bus-tab.active {
+            background: rgba(0,212,255,0.2);
+            border-color: #00d4ff;
+        }
+        
+        .bus-card {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .bus-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .bus-number {
+            font-size: 36px;
+            font-weight: 700;
+            color: #00d4ff;
+            min-width: 60px;
+        }
+        
+        .bus-dest {
+            font-size: 18px;
+            color: #ccc;
+        }
+        
+        .bus-time {
+            font-size: 42px;
+            font-weight: 300;
+            color: #00ff88;
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .bus-time.soon {
+            color: #ffaa00;
+        }
+        
+        .bus-time.departed {
+            color: #ff4444;
+        }
+        
+        /* Family Panel */
+        .family-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .family-member {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .family-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid #00d4ff;
+            margin-bottom: 10px;
+            object-fit: cover;
+        }
+        
+        .family-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #fff;
+        }
+        
+        .family-status {
+            font-size: 14px;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        /* Quick Actions */
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .action-btn {
+            background: rgba(0,212,255,0.1);
+            border: 1px solid rgba(0,212,255,0.3);
+            border-radius: 12px;
+            padding: 25px;
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .action-btn:hover {
+            background: rgba(0,212,255,0.2);
+        }
+        
+        .action-icon {
+            font-size: 36px;
+        }
+        
+        /* Status Indicators */
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: pulse 2s infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+        }
+        
+        /* No data message */
+        .no-data {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+            font-size: 18px;
+        }
+        
+        /* Kiosk mode - hide scrollbars but keep functionality */
+        @media screen and (display-mode: fullscreen) {
+            ::-webkit-scrollbar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hub-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <div class="clock" id="clock">--:--</div>
+                <div class="date" id="date">Loading...</div>
+            </div>
+            <div class="weather">
+                <div class="weather-temp" id="weather-temp">--°</div>
+                <div class="weather-desc" id="weather-desc">Loading...</div>
+            </div>
+        </div>
+        
+        <!-- Bus Times Panel -->
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-icon">🚌</span>
+                <span class="panel-title">Bus Times</span>
+                <span class="status-dot"></span>
+            </div>
+            <div class="bus-tabs">
+                <button class="bus-tab active" onclick="switchBusTab('to-city')">→ To City</button>
+                <button class="bus-tab" onclick="switchBusTab('to-home')">→ Home</button>
+            </div>
+            <div class="panel-content" id="bus-content">
+                <div class="no-data">Loading bus data...</div>
+            </div>
+        </div>
+        
+        <!-- Family Panel -->
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-icon">👨‍👩‍👧‍👧</span>
+                <span class="panel-title">Family</span>
+            </div>
+            <div class="panel-content">
+                <div class="family-grid">
+                    <div class="family-member">
+                        <img src="https://raw.githubusercontent.com/MarvinClaw007/openclaw-web/main/avatars/jim.jpg" alt="Jim" class="family-avatar">
+                        <div class="family-name">Jim</div>
+                        <div class="family-status">🍳 Cooking tonight</div>
+                    </div>
+                    <div class="family-member">
+                        <div class="family-avatar" style="background: linear-gradient(135deg, #ff6b6b, #feca57); display: flex; align-items: center; justify-content: center; font-size: 36px;">N</div>
+                        <div class="family-name">Nicola</div>
+                        <div class="family-status">📋 Managing recipes</div>
+                    </div>
+                    <div class="family-member">
+                        <div class="family-avatar" style="background: linear-gradient(135deg, #a29bfe, #6c5ce7); display: flex; align-items: center; justify-content: center; font-size: 36px;">S</div>
+                        <div class="family-name">Sophie</div>
+                        <div class="family-status">👩‍ Has recipes</div>
+                    </div>
+                    <div class="family-member">
+                        <div class="family-avatar" style="background: linear-gradient(135deg, #fd79a8, #e84393); display: flex; align-items: center; justify-content: center; font-size: 36px;">L</div>
+                        <div class="family-name">Lilly</div>
+                        <div class="family-status">👩‍ Has recipes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions Panel -->
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-icon">⚡</span>
+                <span class="panel-title">Quick Actions</span>
+            </div>
+            <div class="panel-content">
+                <div class="actions-grid">
+                    <button class="action-btn" onclick="window.open('https://openclaw-intranet.vercel.app', '_blank')">
+                        <span class="action-icon">🦞</span>
+                        <span>OpenClaw Hub</span>
+                    </button>
+                    <button class="action-btn" onclick="window.open('https://github.com/MarvinClaw007/Family-command-centre', '_blank')">
+                        <span class="action-icon">🍳</span>
+                        <span>Recipes</span>
+                    </button>
+                    <button class="action-btn" onclick="location.reload()">
+                        <span class="action-icon">🔄</span>
+                        <span>Refresh</span>
+                    </button>
+                    <button class="action-btn" onclick="toggleFullscreen()">
+                        <span class="action-icon">⛶</span>
+                        <span>Fullscreen</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Status Panel -->
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-icon">📊</span>
+                <span class="panel-title">Status</span>
+            </div>
+            <div class="panel-content">
+                <div style="font-size: 18px; line-height: 2;">
+                    <div>🟢 <strong>OpenClaw:</strong> Online</div>
+                    <div>🟢 <strong>Dashboard:</strong> Running</div>
+                    <div>🟢 <strong>Bus API:</strong> Connected</div>
+                    <div>🟢 <strong>Weather:</strong> Updated</div>
+                    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+                        <strong>Tailscale IP:</strong> 100.81.9.50<br>
+                        <strong>Last Update:</strong> <span id="last-update">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Clock
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent = now.toLocaleTimeString('en-AU', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+            });
+            document.getElementById('date').textContent = now.toLocaleDateString('en-AU', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+        
+        // Weather (using a simple API)
+        async function fetchWeather() {
+            try {
+                // Using Open-Meteo for Sydney weather
+                const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=-33.87&longitude=151.21&current_weather=true');
+                const data = await response.json();
+                document.getElementById('weather-temp').textContent = Math.round(data.current_weather.temperature) + '°';
+                document.getElementById('weather-desc').textContent = getWeatherDesc(data.current_weather.weathercode);
+            } catch (e) {
+                document.getElementById('weather-desc').textContent = 'Unavailable';
+            }
+        }
+        
+        function getWeatherDesc(code) {
+            const codes = {
+                0: 'Clear sky', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
+                45: 'Foggy', 48: 'Foggy', 51: 'Light drizzle', 53: 'Drizzle',
+                55: 'Heavy drizzle', 61: 'Light rain', 63: 'Rain', 65: 'Heavy rain'
+            };
+            return codes[code] || 'Unknown';
+        }
+        fetchWeather();
+        setInterval(fetchWeather, 600000); // Update every 10 minutes
+        
+        // Bus Data
+        let currentBusTab = 'to-city';
+        const allowedRoutes = ['270', '270X', '271', '274'];
+        
+        function switchBusTab(tab) {
+            currentBusTab = tab;
+            document.querySelectorAll('.bus-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            fetchBusData();
+        }
+        
+        async function fetchBusData() {
+            const stopId = currentBusTab === 'to-city' ? '208560' : '2000220';
+            const container = document.getElementById('bus-content');
+            
+            try {
+                const response = await fetch(`https://marvin-commute.vercel.app/api/bus?stop=${stopId}`);
+                const data = await response.json();
+                renderBuses(data, container);
+            } catch (error) {
+                container.innerHTML = '<div class="no-data">Unable to load bus data</div>';
+            }
+        }
+        
+        function renderBuses(data, container) {
+            const now = new Date();
+            
+            if (!data.stopEvents) {
+                container.innerHTML = '<div class="no-data">No bus data available</div>';
+                return;
+            }
+            
+            const buses = data.stopEvents
+                .filter(event => {
+                    const lineNo = event.transportation?.number || '';
+                    const departureTime = new Date(event.departureTimeEstimated || event.departureTimePlanned);
+                    const secondsSinceDeparture = (now - departureTime) / 1000;
+                    return allowedRoutes.includes(lineNo) && secondsSinceDeparture < 15;
+                })
+                .sort((a, b) => new Date(a.departureTimeEstimated || a.departureTimePlanned) - new Date(b.departureTimeEstimated || b.departureTimePlanned))
+                .slice(0, 4);
+            
+            if (buses.length === 0) {
+                container.innerHTML = '<div class="no-data">No buses found</div>';
+                return;
+            }
+            
+            container.innerHTML = buses.map(event => {
+                const lineNo = event.transportation?.number || '?';
+                const destination = event.transportation?.destination?.name || 'Unknown';
+                const departureTime = event.departureTimeEstimated || event.departureTimePlanned;
+                const minsUntil = Math.floor((new Date(departureTime) - now) / 60000);
+                
+                let timeDisplay;
+                let timeClass = '';
+                if (minsUntil < 0) {
+                    timeDisplay = 'Departed';
+                    timeClass = 'departed';
+                } else if (minsUntil === 0) {
+                    timeDisplay = 'Now';
+                    timeClass = 'soon';
+                } else if (minsUntil > 60) {
+                    timeDisplay = new Date(departureTime).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit', hour12: false });
+                } else {
+                    timeDisplay = minsUntil + ' min';
+                    if (minsUntil < 5) timeClass = 'soon';
+                }
+                
+                return `
+                    <div class="bus-card">
+                        <div class="bus-info">
+                            <div class="bus-number">${lineNo}</div>
+                            <div class="bus-dest">${destination}</div>
+                        </div>
+                        <div class="bus-time ${timeClass}">${timeDisplay}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        fetchBusData();
+        setInterval(fetchBusData, 30000); // Update every 30 seconds
+        
+        // Update timestamp
+        document.getElementById('last-update').textContent = new Date().toLocaleTimeString('en-AU');
+        
+        // Fullscreen toggle
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+        
+        // Prevent sleep (keep screen on)
+        if ('wakeLock' in navigator) {
+            navigator.wakeLock.request('screen').catch(err => {
+                console.log('Wake lock not granted:', err);
+            });
+        }
+    </script>
+</body>
+</html>
